@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect } from "react";
+import { open } from "@tauri-apps/plugin-dialog";
 import { DropZone } from "./components/DropZone";
 import { QueuePanel } from "./components/QueuePanel";
 import { Settings } from "./components/Settings";
 import { useConversionQueue } from "./hooks/useConversionQueue";
 import { useIPCEvents } from "./hooks/useIPCEvents";
-import { convertBatch, getDefaultOutputDir } from "./lib/ipc";
-import type { AppSettings, ConversionStatus } from "./types/conversion";
+import { convertBatch, getDefaultOutputDir, getFileInfo, openFolder, loadSettings, saveSettings } from "./lib/ipc";
+import type { AppSettings, BatchCompleteEvent, ConversionStatus } from "./types/conversion";
 import { DEFAULT_SETTINGS } from "./types/conversion";
 
 function App() {
@@ -17,15 +18,42 @@ function App() {
     setOutputFormat,
     updateProgress,
     resetFile,
+    updateSize,
   } = useConversionQueue();
 
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [isConverting, setIsConverting] = useState(false);
+  const [forgeTriggered, setForgeTriggered] = useState(false);
+  const [notification, setNotification] = useState<string | null>(null);
+  const [completionInfo, setCompletionInfo] = useState<{
+    succeeded: number;
+    failed: number;
+    outputDir: string;
+  } | null>(null);
 
+  const anyConverting = files.some((f) => f.status === "converting");
+  const isConverting = forgeTriggered || anyConverting;
+
+  // Safety net: reset forgeTriggered if all files are done/error/queued
   useEffect(() => {
-    getDefaultOutputDir().then((dir) => {
-      setSettings((prev) => ({ ...prev, outputDir: dir }));
+    if (
+      forgeTriggered &&
+      files.length > 0 &&
+      files.every((f) => f.status === "done" || f.status === "error" || f.status === "queued")
+    ) {
+      const timer = setTimeout(() => setForgeTriggered(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [files, forgeTriggered]);
+
+  // Load settings on mount
+  useEffect(() => {
+    Promise.all([getDefaultOutputDir(), loadSettings()]).then(([defaultDir, saved]) => {
+      setSettings({
+        outputDir: saved.outputDir || defaultDir,
+        maxFileSize: saved.maxFileSize ?? DEFAULT_SETTINGS.maxFileSize,
+        maxConcurrency: saved.maxConcurrency ?? DEFAULT_SETTINGS.maxConcurrency,
+      });
     });
   }, []);
 
@@ -36,17 +64,58 @@ function App() {
     [updateProgress]
   );
 
-  const handleBatchComplete = useCallback(() => {
-    setIsConverting(false);
+  const handleBatchComplete = useCallback((event: BatchCompleteEvent) => {
+    setForgeTriggered(false);
+    if (event.succeeded > 0 || event.failed > 0) {
+      setCompletionInfo({
+        succeeded: event.succeeded,
+        failed: event.failed,
+        outputDir: event.outputDir,
+      });
+      setTimeout(() => setCompletionInfo(null), 8000);
+    }
   }, []);
 
   useIPCEvents({ onProgress: handleProgress, onBatchComplete: handleBatchComplete });
+
+  const handleFilesAdded = useCallback(
+    async (paths: string[]) => {
+      const { unsupported } = addFiles(paths);
+      if (unsupported > 0) {
+        setNotification(
+          `${unsupported} file${unsupported > 1 ? "s" : ""} skipped (unsupported format)`
+        );
+        setTimeout(() => setNotification(null), 3000);
+      }
+      // Fetch file sizes
+      try {
+        const infos = await getFileInfo(paths);
+        for (const info of infos) {
+          updateSize(info.path, info.size);
+        }
+      } catch {
+        // ignore file info errors
+      }
+    },
+    [addFiles, updateSize]
+  );
+
+  const handleBrowse = useCallback(async () => {
+    const selected = await open({
+      multiple: true,
+      title: "Select files to convert",
+    });
+    if (selected) {
+      const paths = Array.isArray(selected) ? selected : [selected];
+      handleFilesAdded(paths);
+    }
+  }, [handleFilesAdded]);
 
   const handleConvertAll = useCallback(async () => {
     const queued = files.filter((f) => f.status === "queued");
     if (queued.length === 0) return;
 
-    setIsConverting(true);
+    setForgeTriggered(true);
     try {
       await convertBatch({
         files: queued.map((f) => ({
@@ -59,16 +128,60 @@ function App() {
       });
     } catch (err) {
       console.error("Batch conversion failed:", err);
-      setIsConverting(false);
+      setForgeTriggered(false);
     }
   }, [files, settings]);
 
   const handleRetry = useCallback(
-    (id: string) => {
+    async (id: string) => {
       resetFile(id);
+      const file = files.find((f) => f.id === id);
+      if (file) {
+        try {
+          await convertBatch({
+            files: [{ id: file.id, inputPath: file.path, outputFormat: file.outputFormat }],
+            outputDir: settings.outputDir,
+            maxConcurrency: 1,
+          });
+        } catch (err) {
+          console.error("Retry failed:", err);
+        }
+      }
     },
-    [resetFile]
+    [resetFile, files, settings]
   );
+
+  const handleSettingsChange = useCallback((newSettings: AppSettings) => {
+    setSettings(newSettings);
+    saveSettings(newSettings);
+  }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+O: browse files
+      if (e.metaKey && e.key === "o") {
+        e.preventDefault();
+        handleBrowse();
+      }
+      // Cmd+Enter: forge all
+      if (e.metaKey && e.key === "Enter" && !isConverting) {
+        e.preventDefault();
+        handleConvertAll();
+      }
+      // Cmd+,: open settings
+      if (e.metaKey && e.key === ",") {
+        e.preventDefault();
+        setSettingsOpen(true);
+      }
+      // Escape: close settings
+      if (e.key === "Escape" && settingsOpen) {
+        setSettingsOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleBrowse, handleConvertAll, isConverting, settingsOpen]);
 
   return (
     <div className="flex flex-col items-center min-h-screen px-6 py-7">
@@ -113,8 +226,44 @@ function App() {
 
       {/* Drop Zone */}
       <div className="mt-5 w-full flex justify-center animate-fade-in" style={{ animationDelay: "100ms" }}>
-        <DropZone onFilesDropped={addFiles} fileCount={files.length} />
+        <DropZone onFilesDropped={handleFilesAdded} fileCount={files.length} onBrowse={handleBrowse} />
       </div>
+
+      {/* Completion Banner */}
+      {completionInfo && (
+        <div className="w-full max-w-2xl mt-4 animate-slide-up">
+          <div className="bg-success-dim/30 border border-success/20 rounded-lg px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 16 16" className="text-success">
+                <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.2" />
+                <path
+                  d="M5 8l2.5 2.5L11 6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="font-display text-[12px] text-success">
+                {completionInfo.succeeded} file{completionInfo.succeeded !== 1 ? "s" : ""} forged
+                {completionInfo.failed > 0 && (
+                  <span className="text-error ml-2">{completionInfo.failed} failed</span>
+                )}
+              </span>
+            </div>
+            <button
+              onClick={() => openFolder(completionInfo.outputDir)}
+              className="text-[10px] font-display text-accent tracking-wider uppercase
+                         border border-accent-dim/40 rounded px-2.5 py-1
+                         hover:bg-accent/10 hover:border-accent/40
+                         transition-all duration-200"
+            >
+              Open Folder
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Queue */}
       <QueuePanel
@@ -130,10 +279,19 @@ function App() {
       {/* Settings */}
       <Settings
         settings={settings}
-        onSettingsChange={setSettings}
+        onSettingsChange={handleSettingsChange}
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
       />
+
+      {/* Notification Toast */}
+      {notification && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up">
+          <div className="bg-bg-elevated border border-accent-dim/30 rounded-lg px-4 py-2.5 shadow-lg">
+            <span className="font-display text-[11px] text-accent">{notification}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

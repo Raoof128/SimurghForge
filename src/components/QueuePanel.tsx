@@ -27,7 +27,7 @@ export function QueuePanel({
   const errorCount = files.filter((f) => f.status === "error").length;
 
   return (
-    <div className="w-full max-w-2xl mt-6 animate-fade-in">
+    <div className="w-full max-w-2xl mt-6 animate-fade-in" aria-live="polite">
       {/* Separator */}
       <div className="forge-separator mb-5" />
 
@@ -56,6 +56,7 @@ export function QueuePanel({
 
         <div className="flex items-center gap-2">
           <button
+            aria-label="Clear queue"
             onClick={onClearQueue}
             disabled={isConverting}
             className="text-[10px] font-display text-text-muted/50 tracking-wider uppercase
@@ -67,6 +68,7 @@ export function QueuePanel({
           </button>
 
           <button
+            aria-label="Convert all queued files"
             onClick={onConvertAll}
             disabled={!hasQueuedFiles || isConverting}
             className={`relative text-[11px] font-display font-bold tracking-wider uppercase

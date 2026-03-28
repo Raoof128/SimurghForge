@@ -11,7 +11,7 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end animate-fade-in">
+    <div className="fixed inset-0 z-50 flex justify-end animate-fade-in" role="dialog" aria-label="Settings" aria-modal="true">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={onClose} />
 
@@ -28,7 +28,8 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
               onClick={onClose}
               className="w-7 h-7 rounded-md flex items-center justify-center
                          text-text-muted/50 hover:text-text-primary hover:bg-bg-hover
-                         transition-all duration-200"
+                         transition-all duration-200
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
               <svg width="14" height="14" viewBox="0 0 14 14">
                 <path d="M4 4l6 6M10 4l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -52,6 +53,7 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
               className="w-full bg-bg-elevated/80 text-text-primary border border-text-muted/10 rounded-md
                          px-3 py-2.5 text-xs font-display
                          focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40
                          placeholder:text-text-muted/30
                          transition-all duration-200"
               placeholder="~/Downloads/SimurghForge/"

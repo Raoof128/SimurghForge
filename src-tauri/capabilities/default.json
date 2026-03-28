@@ -9,6 +9,10 @@
     "core:default",
     "core:event:default",
     "core:event:allow-listen",
-    "core:event:allow-emit"
+    "core:event:allow-emit",
+    "dialog:default",
+    "dialog:allow-open",
+    "shell:default",
+    "shell:allow-open"
   ]
 }

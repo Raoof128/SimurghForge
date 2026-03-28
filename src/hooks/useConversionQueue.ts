@@ -15,12 +15,17 @@ type QueueAction =
       errorMsg?: string;
       outputPath?: string;
     }
-  | { type: "RESET_FILE"; id: string };
+  | { type: "RESET_FILE"; id: string }
+  | { type: "UPDATE_SIZE"; path: string; size: number };
 
 function queueReducer(state: FileItem[], action: QueueAction): FileItem[] {
   switch (action.type) {
-    case "ADD_FILES":
-      return [...state, ...action.files];
+    case "ADD_FILES": {
+      const existingPaths = new Set(state.map((f) => f.path));
+      const unique = action.files.filter((f) => !existingPaths.has(f.path));
+      const capacity = Math.max(0, 50 - state.length);
+      return [...state, ...unique.slice(0, capacity)];
+    }
     case "REMOVE_FILE":
       return state.filter((f) => f.id !== action.id);
     case "CLEAR_QUEUE":
@@ -47,6 +52,10 @@ function queueReducer(state: FileItem[], action: QueueAction): FileItem[] {
           ? { ...f, status: "queued", percent: 0, errorMsg: undefined, outputPath: undefined }
           : f
       );
+    case "UPDATE_SIZE":
+      return state.map((f) =>
+        f.path === action.path ? { ...f, size: action.size } : f
+      );
     default:
       return state;
   }
@@ -56,13 +65,17 @@ export function useConversionQueue() {
   const [files, dispatch] = useReducer(queueReducer, []);
 
   const addFiles = useCallback(
-    (paths: string[]) => {
+    (paths: string[]): { attempted: number; unsupported: number } => {
       const newFiles: FileItem[] = [];
+      let unsupported = 0;
       for (const path of paths) {
         const name = path.split("/").pop() ?? path;
         const ext = getInputExtension(name);
         const formats = getOutputFormats(name);
-        if (formats.length === 0) continue;
+        if (formats.length === 0) {
+          unsupported++;
+          continue;
+        }
         newFiles.push({
           id: crypto.randomUUID(),
           name,
@@ -77,6 +90,7 @@ export function useConversionQueue() {
       if (newFiles.length > 0) {
         dispatch({ type: "ADD_FILES", files: newFiles });
       }
+      return { attempted: paths.length, unsupported };
     },
     []
   );
@@ -113,6 +127,11 @@ export function useConversionQueue() {
     []
   );
 
+  const updateSize = useCallback(
+    (path: string, size: number) => dispatch({ type: "UPDATE_SIZE", path, size }),
+    []
+  );
+
   return {
     files,
     addFiles,
@@ -121,5 +140,6 @@ export function useConversionQueue() {
     setOutputFormat,
     updateProgress,
     resetFile,
+    updateSize,
   };
 }

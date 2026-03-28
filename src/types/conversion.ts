@@ -50,3 +50,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   maxFileSize: 500 * 1024 * 1024,
   maxConcurrency: 4,
 };
+
+export interface SkippedNotification {
+  count: number;
+  message: string;
+}

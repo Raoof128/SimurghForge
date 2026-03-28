@@ -40,13 +40,15 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, index }: Fil
   const cardClass = isConverting
     ? "border-accent/60 animate-heat-border"
     : isDone
-      ? "border-success/40 bg-success-dim/20"
+      ? "border-success/40 bg-success-dim/20 hover:border-success/60"
       : isError
-        ? "border-error/40 bg-error-dim/20"
+        ? "border-error/40 bg-error-dim/20 hover:border-error/60"
         : "border-text-muted/10 hover:border-accent-dim/40";
 
   return (
     <div
+      role="group"
+      aria-label={`File: ${file.name}, Status: ${file.status}`}
       className={`animate-slide-up group relative bg-bg-surface/80 backdrop-blur-sm border rounded-lg transition-all duration-300 ${cardClass}`}
       style={{ animationDelay: `${index * 60}ms` }}
     >
@@ -77,7 +79,7 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, index }: Fil
             <p className="font-display text-[13px] text-text-primary truncate leading-tight">
               {file.name}
             </p>
-            <p className="text-[10px] text-text-muted mt-0.5 font-body">
+            <p className="text-[11px] text-text-muted mt-0.5 font-body">
               {file.size > 0 ? formatFileSize(file.size) : file.inputFormat.toUpperCase()}
             </p>
           </div>
@@ -119,7 +121,7 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, index }: Fil
               <span className="text-[10px] font-display text-accent tracking-wider">
                 FORGING
               </span>
-              <span className="text-[10px] font-display text-accent-bright tabular-nums">
+              <span className="text-[11px] font-display text-accent-bright tabular-nums">
                 {file.percent}%
               </span>
             </div>

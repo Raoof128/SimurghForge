@@ -7,7 +7,14 @@ export function ProgressBar({ percent, isActive }: ProgressBarProps) {
   const clampedPercent = Math.min(100, Math.max(0, percent));
 
   return (
-    <div className="relative w-full h-[6px] bg-bg-base rounded-full overflow-hidden">
+    <div
+      className="relative w-full h-[6px] bg-bg-base rounded-full overflow-hidden"
+      role="progressbar"
+      aria-valuenow={clampedPercent}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`Conversion progress: ${clampedPercent}%`}
+    >
       {/* Track glow (subtle ambient light from the bar) */}
       {isActive && (
         <div
