@@ -33,9 +33,7 @@ function queueReducer(state: FileItem[], action: QueueAction): FileItem[] {
     case "CLEAR_QUEUE":
       return [];
     case "SET_OUTPUT_FORMAT":
-      return state.map((f) =>
-        f.id === action.id ? { ...f, outputFormat: action.format } : f
-      );
+      return state.map((f) => (f.id === action.id ? { ...f, outputFormat: action.format } : f));
     case "UPDATE_PROGRESS":
       return state.map((f) =>
         f.id === action.id
@@ -46,22 +44,18 @@ function queueReducer(state: FileItem[], action: QueueAction): FileItem[] {
               errorMsg: action.errorMsg,
               outputPath: action.outputPath,
             }
-          : f
+          : f,
       );
     case "RESET_FILE":
       return state.map((f) =>
         f.id === action.id
           ? { ...f, status: "queued", percent: 0, errorMsg: undefined, outputPath: undefined }
-          : f
+          : f,
       );
     case "UPDATE_SIZE":
-      return state.map((f) =>
-        f.path === action.path ? { ...f, size: action.size } : f
-      );
+      return state.map((f) => (f.path === action.path ? { ...f, size: action.size } : f));
     case "SET_OPTIONS":
-      return state.map((f) =>
-        f.id === action.id ? { ...f, options: action.options } : f
-      );
+      return state.map((f) => (f.id === action.id ? { ...f, options: action.options } : f));
     default:
       return state;
   }
@@ -70,52 +64,42 @@ function queueReducer(state: FileItem[], action: QueueAction): FileItem[] {
 export function useConversionQueue() {
   const [files, dispatch] = useReducer(queueReducer, []);
 
-  const addFiles = useCallback(
-    (paths: string[]): { attempted: number; unsupported: number } => {
-      const newFiles: FileItem[] = [];
-      let unsupported = 0;
-      for (const path of paths) {
-        const name = path.split("/").pop() ?? path;
-        const ext = getInputExtension(name);
-        const formats = getOutputFormats(name);
-        if (formats.length === 0) {
-          unsupported++;
-          continue;
-        }
-        newFiles.push({
-          id: crypto.randomUUID(),
-          name,
-          path,
-          size: 0,
-          inputFormat: ext,
-          outputFormat: formats[0],
-          status: "queued",
-          percent: 0,
-          options: DEFAULT_OPTIONS,
-        });
+  const addFiles = useCallback((paths: string[]): { attempted: number; unsupported: number } => {
+    const newFiles: FileItem[] = [];
+    let unsupported = 0;
+    for (const path of paths) {
+      const name = path.split("/").pop() ?? path;
+      const ext = getInputExtension(name);
+      const formats = getOutputFormats(name);
+      if (formats.length === 0) {
+        unsupported++;
+        continue;
       }
-      if (newFiles.length > 0) {
-        dispatch({ type: "ADD_FILES", files: newFiles });
-      }
-      return { attempted: paths.length, unsupported };
-    },
-    []
-  );
+      newFiles.push({
+        id: crypto.randomUUID(),
+        name,
+        path,
+        size: 0,
+        inputFormat: ext,
+        outputFormat: formats[0],
+        status: "queued",
+        percent: 0,
+        options: DEFAULT_OPTIONS,
+      });
+    }
+    if (newFiles.length > 0) {
+      dispatch({ type: "ADD_FILES", files: newFiles });
+    }
+    return { attempted: paths.length, unsupported };
+  }, []);
 
-  const removeFile = useCallback(
-    (id: string) => dispatch({ type: "REMOVE_FILE", id }),
-    []
-  );
+  const removeFile = useCallback((id: string) => dispatch({ type: "REMOVE_FILE", id }), []);
 
-  const clearQueue = useCallback(
-    () => dispatch({ type: "CLEAR_QUEUE" }),
-    []
-  );
+  const clearQueue = useCallback(() => dispatch({ type: "CLEAR_QUEUE" }), []);
 
   const setOutputFormat = useCallback(
-    (id: string, format: string) =>
-      dispatch({ type: "SET_OUTPUT_FORMAT", id, format }),
-    []
+    (id: string, format: string) => dispatch({ type: "SET_OUTPUT_FORMAT", id, format }),
+    [],
   );
 
   const updateProgress = useCallback(
@@ -124,25 +108,21 @@ export function useConversionQueue() {
       status: ConversionStatus,
       percent: number,
       errorMsg?: string,
-      outputPath?: string
+      outputPath?: string,
     ) => dispatch({ type: "UPDATE_PROGRESS", id, status, percent, errorMsg, outputPath }),
-    []
+    [],
   );
 
-  const resetFile = useCallback(
-    (id: string) => dispatch({ type: "RESET_FILE", id }),
-    []
-  );
+  const resetFile = useCallback((id: string) => dispatch({ type: "RESET_FILE", id }), []);
 
   const updateSize = useCallback(
     (path: string, size: number) => dispatch({ type: "UPDATE_SIZE", path, size }),
-    []
+    [],
   );
 
   const setOptions = useCallback(
-    (id: string, options: ConversionOptions) =>
-      dispatch({ type: "SET_OPTIONS", id, options }),
-    []
+    (id: string, options: ConversionOptions) => dispatch({ type: "SET_OPTIONS", id, options }),
+    [],
   );
 
   return {

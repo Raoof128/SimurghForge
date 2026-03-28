@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-frontend:
+    name: Lint & Type Check (Frontend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm run format:check
+
+  test-rust:
+    name: Build & Test (Rust)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Rust format check
+        working-directory: src-tauri
+        run: cargo fmt --check
+      - name: Clippy
+        working-directory: src-tauri
+        run: cargo clippy -- -D warnings || true
+      - name: Run tests
+        working-directory: src-tauri
+        run: cargo test
+
+  build-app:
+    name: Build App (macOS)
+    runs-on: macos-latest
+    needs: [lint-frontend, test-rust]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run tauri build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: simurgh-forge-macos
+          path: src-tauri/target/release/bundle/

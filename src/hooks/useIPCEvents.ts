@@ -8,7 +8,7 @@ interface UseIPCEventsProps {
     status: ConversionStatus,
     percent: number,
     errorMsg?: string,
-    outputPath?: string
+    outputPath?: string,
   ) => void;
   onBatchComplete?: (event: BatchCompleteEvent) => void;
 }

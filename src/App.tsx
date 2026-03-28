@@ -5,7 +5,14 @@ import { QueuePanel } from "./components/QueuePanel";
 import { Settings } from "./components/Settings";
 import { useConversionQueue } from "./hooks/useConversionQueue";
 import { useIPCEvents } from "./hooks/useIPCEvents";
-import { convertBatch, getDefaultOutputDir, getFileInfo, openFolder, loadSettings, saveSettings } from "./lib/ipc";
+import {
+  convertBatch,
+  getDefaultOutputDir,
+  getFileInfo,
+  openFolder,
+  loadSettings,
+  saveSettings,
+} from "./lib/ipc";
 import type { AppSettings, BatchCompleteEvent, ConversionStatus } from "./types/conversion";
 import { DEFAULT_SETTINGS } from "./types/conversion";
 
@@ -59,10 +66,16 @@ function App() {
   }, []);
 
   const handleProgress = useCallback(
-    (id: string, status: ConversionStatus, percent: number, errorMsg?: string, outputPath?: string) => {
+    (
+      id: string,
+      status: ConversionStatus,
+      percent: number,
+      errorMsg?: string,
+      outputPath?: string,
+    ) => {
       updateProgress(id, status, percent, errorMsg, outputPath);
     },
-    [updateProgress]
+    [updateProgress],
   );
 
   const handleBatchComplete = useCallback((event: BatchCompleteEvent) => {
@@ -83,7 +96,7 @@ function App() {
       const { unsupported } = addFiles(paths);
       if (unsupported > 0) {
         setNotification(
-          `${unsupported} file${unsupported > 1 ? "s" : ""} skipped (unsupported format)`
+          `${unsupported} file${unsupported > 1 ? "s" : ""} skipped (unsupported format)`,
         );
         setTimeout(() => setNotification(null), 3000);
       }
@@ -97,7 +110,7 @@ function App() {
         // ignore file info errors
       }
     },
-    [addFiles, updateSize]
+    [addFiles, updateSize],
   );
 
   const handleBrowse = useCallback(async () => {
@@ -140,7 +153,14 @@ function App() {
       if (file) {
         try {
           await convertBatch({
-            files: [{ id: file.id, inputPath: file.path, outputFormat: file.outputFormat, options: file.options }],
+            files: [
+              {
+                id: file.id,
+                inputPath: file.path,
+                outputFormat: file.outputFormat,
+                options: file.options,
+              },
+            ],
             outputDir: settings.outputDir,
             maxConcurrency: 1,
           });
@@ -149,7 +169,7 @@ function App() {
         }
       }
     },
-    [resetFile, files, settings]
+    [resetFile, files, settings],
   );
 
   const handleSettingsChange = useCallback((newSettings: AppSettings) => {
@@ -226,8 +246,15 @@ function App() {
       </header>
 
       {/* Drop Zone */}
-      <div className="mt-5 w-full flex justify-center animate-fade-in" style={{ animationDelay: "100ms" }}>
-        <DropZone onFilesDropped={handleFilesAdded} fileCount={files.length} onBrowse={handleBrowse} />
+      <div
+        className="mt-5 w-full flex justify-center animate-fade-in"
+        style={{ animationDelay: "100ms" }}
+      >
+        <DropZone
+          onFilesDropped={handleFilesAdded}
+          fileCount={files.length}
+          onBrowse={handleBrowse}
+        />
       </div>
 
       {/* Completion Banner */}
@@ -274,7 +301,10 @@ function App() {
         onRetry={handleRetry}
         onOptionsChange={setOptions}
         onConvertAll={handleConvertAll}
-        onClearQueue={() => { clearQueue(); setCompletionInfo(null); }}
+        onClearQueue={() => {
+          clearQueue();
+          setCompletionInfo(null);
+        }}
         isConverting={isConverting}
       />
 

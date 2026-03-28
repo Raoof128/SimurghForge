@@ -32,9 +32,10 @@ export function FormatSelector({
     const visibleCount = showMore ? allFormats.length : (groups[0]?.formats.length ?? 0);
     const dropdownHeight = visibleCount * 30 + (hasMore ? 32 : 0) + 8;
     const spaceBelow = window.innerHeight - rect.bottom;
-    const top = spaceBelow < dropdownHeight && rect.top > dropdownHeight
-      ? rect.top - dropdownHeight
-      : rect.bottom + 4;
+    const top =
+      spaceBelow < dropdownHeight && rect.top > dropdownHeight
+        ? rect.top - dropdownHeight
+        : rect.bottom + 4;
 
     setPosition({
       top,
@@ -45,8 +46,10 @@ export function FormatSelector({
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
-        buttonRef.current && !buttonRef.current.contains(e.target as Node) &&
-        dropdownRef.current && !dropdownRef.current.contains(e.target as Node)
+        buttonRef.current &&
+        !buttonRef.current.contains(e.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
       ) {
         setIsOpen(false);
         setShowMore(false);
@@ -96,85 +99,99 @@ export function FormatSelector({
         aria-label={`Output format: ${selectedFormat.toUpperCase()}`}
       >
         <span>.{selectedFormat.toUpperCase()}</span>
-        <svg width="10" height="6" viewBox="0 0 10 6" className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
-          <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+        <svg
+          width="10"
+          height="6"
+          viewBox="0 0 10 6"
+          className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        >
+          <path
+            d="M1 1L5 5L9 1"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            fill="none"
+          />
         </svg>
       </button>
 
-      {isOpen && createPortal(
-        <div
-          ref={dropdownRef}
-          className="fixed min-w-[110px] bg-bg-elevated border border-accent-dim/40 rounded-md shadow-xl
+      {isOpen &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            className="fixed min-w-[110px] bg-bg-elevated border border-accent-dim/40 rounded-md shadow-xl
                      overflow-hidden animate-fade-in"
-          style={{
-            top: position.top,
-            left: Math.max(8, position.left),
-            zIndex: 9999,
-          }}
-          role="listbox"
-          aria-label="Output formats"
-        >
-          {/* Common formats */}
-          {groups[0]?.formats.map((fmt) => (
-            <button
-              key={fmt}
-              role="option"
-              aria-selected={fmt === selectedFormat}
-              onClick={() => handleSelect(fmt)}
-              className={`w-full text-left px-3 py-1.5 text-[11px] font-display tracking-wider uppercase
+            style={{
+              top: position.top,
+              left: Math.max(8, position.left),
+              zIndex: 9999,
+            }}
+            role="listbox"
+            aria-label="Output formats"
+          >
+            {/* Common formats */}
+            {groups[0]?.formats.map((fmt) => (
+              <button
+                key={fmt}
+                role="option"
+                aria-selected={fmt === selectedFormat}
+                onClick={() => handleSelect(fmt)}
+                className={`w-full text-left px-3 py-1.5 text-[11px] font-display tracking-wider uppercase
                          transition-colors duration-100
                          focus-visible:outline-none focus-visible:bg-accent/10
-                         ${fmt === selectedFormat
-                           ? "text-accent bg-accent/10"
-                           : "text-text-secondary hover:text-text-primary hover:bg-bg-hover"
+                         ${
+                           fmt === selectedFormat
+                             ? "text-accent bg-accent/10"
+                             : "text-text-secondary hover:text-text-primary hover:bg-bg-hover"
                          }`}
-            >
-              .{fmt.toUpperCase()}
-            </button>
-          ))}
+              >
+                .{fmt.toUpperCase()}
+              </button>
+            ))}
 
-          {/* "More" toggle + extra formats */}
-          {hasMore && (
-            <>
-              {!showMore && !selectedInMore ? (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowMore(true);
-                  }}
-                  className="w-full text-left px-3 py-1.5 text-[10px] font-display tracking-wider uppercase
+            {/* "More" toggle + extra formats */}
+            {hasMore && (
+              <>
+                {!showMore && !selectedInMore ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMore(true);
+                    }}
+                    className="w-full text-left px-3 py-1.5 text-[10px] font-display tracking-wider uppercase
                              text-text-muted/50 hover:text-text-muted hover:bg-bg-hover
                              transition-colors duration-100 border-t border-text-muted/8"
-                >
-                  + {groups[1].formats.length} more
-                </button>
-              ) : (
-                <>
-                  <div className="border-t border-text-muted/8 mx-2 my-0.5" />
-                  {groups[1].formats.map((fmt) => (
-                    <button
-                      key={fmt}
-                      role="option"
-                      aria-selected={fmt === selectedFormat}
-                      onClick={() => handleSelect(fmt)}
-                      className={`w-full text-left px-3 py-1.5 text-[11px] font-display tracking-wider uppercase
+                  >
+                    + {groups[1].formats.length} more
+                  </button>
+                ) : (
+                  <>
+                    <div className="border-t border-text-muted/8 mx-2 my-0.5" />
+                    {groups[1].formats.map((fmt) => (
+                      <button
+                        key={fmt}
+                        role="option"
+                        aria-selected={fmt === selectedFormat}
+                        onClick={() => handleSelect(fmt)}
+                        className={`w-full text-left px-3 py-1.5 text-[11px] font-display tracking-wider uppercase
                                  transition-colors duration-100
                                  focus-visible:outline-none focus-visible:bg-accent/10
-                                 ${fmt === selectedFormat
-                                   ? "text-accent bg-accent/10"
-                                   : "text-text-muted hover:text-text-primary hover:bg-bg-hover"
+                                 ${
+                                   fmt === selectedFormat
+                                     ? "text-accent bg-accent/10"
+                                     : "text-text-muted hover:text-text-primary hover:bg-bg-hover"
                                  }`}
-                    >
-                      .{fmt.toUpperCase()}
-                    </button>
-                  ))}
-                </>
-              )}
-            </>
-          )}
-        </div>,
-        document.body
-      )}
+                      >
+                        .{fmt.toUpperCase()}
+                      </button>
+                    ))}
+                  </>
+                )}
+              </>
+            )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

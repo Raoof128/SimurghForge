@@ -1,10 +1,10 @@
 [package]
 name = "simurgh-forge"
-version = "0.1.0"
-description = "Simurgh Forge - Desktop File Converter"
-authors = ["Raouf"]
-license = ""
-repository = ""
+version = "0.2.0"
+description = "Universal file converter — 49 formats, 9 engines, native macOS desktop app"
+authors = ["Raouf Abedini"]
+license = "MIT"
+repository = "https://github.com/Raoof128/SimurghForge"
 edition = "2021"
 rust-version = "1.77.2"
 

@@ -23,7 +23,12 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end animate-fade-in" role="dialog" aria-label="Settings" aria-modal="true">
+    <div
+      className="fixed inset-0 z-50 flex justify-end animate-fade-in"
+      role="dialog"
+      aria-label="Settings"
+      aria-modal="true"
+    >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={onClose} />
 
@@ -44,7 +49,12 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
               <svg width="14" height="14" viewBox="0 0 14 14">
-                <path d="M4 4l6 6M10 4l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path
+                  d="M4 4l6 6M10 4l-6 6"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </svg>
             </button>
           </div>
@@ -60,9 +70,7 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
               <input
                 type="text"
                 value={settings.outputDir}
-                onChange={(e) =>
-                  onSettingsChange({ ...settings, outputDir: e.target.value })
-                }
+                onChange={(e) => onSettingsChange({ ...settings, outputDir: e.target.value })}
                 className="flex-1 min-w-0 bg-bg-elevated/80 text-text-primary border border-text-muted/10 rounded-md
                            px-3 py-2.5 text-xs font-display
                            focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20
@@ -82,7 +90,13 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
                 aria-label="Browse for output folder"
               >
                 <svg width="16" height="16" viewBox="0 0 16 16">
-                  <path d="M2 4h4l2 2h6v7H2V4z" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+                  <path
+                    d="M2 4h4l2 2h6v7H2V4z"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </button>
             </div>
@@ -138,9 +152,7 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
             <p className="font-display text-[10px] text-text-muted/30 tracking-wider">
               SIMURGH FORGE v0.1.0
             </p>
-            <p className="text-[9px] text-text-muted/20 mt-1 font-body">
-              Built by Raouf Abedini
-            </p>
+            <p className="text-[9px] text-text-muted/20 mt-1 font-body">Built by Raouf Abedini</p>
           </div>
         </div>
       </div>

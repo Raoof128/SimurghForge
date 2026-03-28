@@ -34,7 +34,14 @@ function getExtensionColor(ext: string): string {
   return "#D4922A"; // default amber for documents
 }
 
-export function FileCard({ file, onFormatChange, onRemove, onRetry, onOptionsChange, index }: FileCardProps) {
+export function FileCard({
+  file,
+  onFormatChange,
+  onRemove,
+  onRetry,
+  onOptionsChange,
+  index,
+}: FileCardProps) {
   const [showQuality, setShowQuality] = useState(false);
   const isConverting = file.status === "converting";
   const isDone = file.status === "done";
@@ -90,8 +97,20 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, onOptionsCha
           </div>
 
           {/* Arrow */}
-          <svg width="16" height="16" viewBox="0 0 16 16" className="flex-shrink-0 text-text-muted/40">
-            <path d="M3 8h10M10 5l3 3-3 3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            className="flex-shrink-0 text-text-muted/40"
+          >
+            <path
+              d="M3 8h10M10 5l3 3-3 3"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
 
           {/* Format selector */}
@@ -113,7 +132,12 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, onOptionsCha
               title="Quality settings"
             >
               <svg width="12" height="12" viewBox="0 0 12 12">
-                <path d="M2 3h8M2 6h8M2 9h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                <path
+                  d="M2 3h8M2 6h8M2 9h8"
+                  stroke="currentColor"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                />
                 <circle cx="4" cy="3" r="1" fill="currentColor" />
                 <circle cx="8" cy="6" r="1" fill="currentColor" />
                 <circle cx="5" cy="9" r="1" fill="currentColor" />
@@ -131,7 +155,12 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, onOptionsCha
               title="Remove"
             >
               <svg width="12" height="12" viewBox="0 0 12 12">
-                <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path
+                  d="M3 3l6 6M9 3l-6 6"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </svg>
             </button>
           )}
@@ -152,9 +181,7 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, onOptionsCha
           <div className="mt-3">
             <ProgressBar percent={file.percent} isActive={true} />
             <div className="flex items-center justify-between mt-1.5">
-              <span className="text-[10px] font-display text-accent tracking-wider">
-                FORGING
-              </span>
+              <span className="text-[10px] font-display text-accent tracking-wider">FORGING</span>
               <span className="text-[11px] font-display text-accent-bright tabular-nums">
                 {file.percent}%
               </span>
@@ -167,7 +194,14 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, onOptionsCha
           <div className="mt-2.5 flex items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 14 14" className="text-success flex-shrink-0">
               <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" strokeWidth="1.2" />
-              <path d="M4.5 7l2 2 3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M4.5 7l2 2 3.5-3.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             <span className="text-[11px] font-display text-success truncate flex-1">
               {file.outputPath?.split("/").pop() ?? "Complete"}
@@ -183,8 +217,21 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, onOptionsCha
                 aria-label={`Open ${file.outputPath.split("/").pop()}`}
               >
                 <svg width="11" height="11" viewBox="0 0 12 12" className="opacity-70">
-                  <path d="M10 1H6.5M10 1v3.5M10 1L5.5 5.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M9 7v3a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1h3" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                  <path
+                    d="M10 1H6.5M10 1v3.5M10 1L5.5 5.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M9 7v3a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1h3"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                  />
                 </svg>
                 Open
               </button>
@@ -197,7 +244,12 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, onOptionsCha
           <div className="mt-2.5 flex items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 14 14" className="text-error flex-shrink-0">
               <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" strokeWidth="1.2" />
-              <path d="M5 5l4 4M9 5l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+              <path
+                d="M5 5l4 4M9 5l-4 4"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+              />
             </svg>
             <span className="text-[11px] text-error/80 flex-1 truncate font-body">
               {file.errorMsg ?? "Conversion failed"}

@@ -3,35 +3,35 @@ export type ConversionStatus = "queued" | "converting" | "done" | "error";
 export type QualityPreset = "low" | "medium" | "high" | "lossless";
 
 export interface ImageOptions {
-  quality: number;        // 1-100
-  maxWidth?: number;      // max pixel width
-  maxHeight?: number;     // max pixel height
-  dpi?: number;           // 72, 150, 300, 600
+  quality: number; // 1-100
+  maxWidth?: number; // max pixel width
+  maxHeight?: number; // max pixel height
+  dpi?: number; // 72, 150, 300, 600
   stripMetadata: boolean;
 }
 
 export interface VideoOptions {
-  resolution?: string;    // "720p", "1080p", "1440p", "4k", "original"
-  bitrate?: number;       // kbps
-  codec?: string;         // "h264", "h265", "vp9"
-  fps?: number;           // 24, 30, 60, "original"
+  resolution?: string; // "720p", "1080p", "1440p", "4k", "original"
+  bitrate?: number; // kbps
+  codec?: string; // "h264", "h265", "vp9"
+  fps?: number; // 24, 30, 60, "original"
 }
 
 export interface AudioOptions {
-  sampleRate?: number;    // 44100, 48000, 96000
-  bitrate?: number;       // kbps
-  channels?: number;      // 1 = mono, 2 = stereo
+  sampleRate?: number; // 44100, 48000, 96000
+  bitrate?: number; // kbps
+  channels?: number; // 1 = mono, 2 = stereo
 }
 
 export interface PdfOptions {
-  compression: string;    // "none", "low", "medium", "high"
+  compression: string; // "none", "low", "medium", "high"
   imageDpi?: number;
 }
 
 export interface DataOptions {
-  delimiter?: string;     // ",", "\t", "|"
+  delimiter?: string; // ",", "\t", "|"
   prettyPrint: boolean;
-  encoding?: string;      // "utf-8", "latin-1"
+  encoding?: string; // "utf-8", "latin-1"
 }
 
 export interface ConversionOptions {

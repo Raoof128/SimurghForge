@@ -27,7 +27,10 @@ export function QueuePanel({
   const hasQueuedFiles = files.some((f) => f.status === "queued");
   const doneCount = files.filter((f) => f.status === "done").length;
   const errorCount = files.filter((f) => f.status === "error").length;
-  const allFinished = files.length > 0 && !isConverting && files.every((f) => f.status === "done" || f.status === "error");
+  const allFinished =
+    files.length > 0 &&
+    !isConverting &&
+    files.every((f) => f.status === "done" || f.status === "error");
 
   return (
     <div className="w-full max-w-2xl mt-6 animate-fade-in" aria-live="polite">
@@ -70,8 +73,21 @@ export function QueuePanel({
             >
               <span className="flex items-center gap-2">
                 <svg width="12" height="12" viewBox="0 0 12 12">
-                  <path d="M1 6a5 5 0 019-2M11 6a5 5 0 01-9 2" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-                  <path d="M10 1v3h-3M2 11V8h3" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M1 6a5 5 0 019-2M11 6a5 5 0 01-9 2"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M10 1v3h-3M2 11V8h3"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
                 New Batch
               </span>
@@ -106,7 +122,16 @@ export function QueuePanel({
                 {isConverting ? (
                   <span className="flex items-center gap-2">
                     <svg width="12" height="12" viewBox="0 0 12 12" className="animate-spin">
-                      <circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="14 14" strokeLinecap="round" />
+                      <circle
+                        cx="6"
+                        cy="6"
+                        r="4.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeDasharray="14 14"
+                        strokeLinecap="round"
+                      />
                     </svg>
                     Forging...
                   </span>

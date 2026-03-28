@@ -44,10 +44,23 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
           }`}
         >
           <div className="flex items-center gap-3">
-            <svg width="20" height="20" viewBox="0 0 40 40" className={`${isDragging ? "text-accent" : "text-text-muted/40"}`}>
-              <path d="M8 28h24M12 28v-4a2 2 0 012-2h12a2 2 0 012 2v4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 40 40"
+              className={`${isDragging ? "text-accent" : "text-text-muted/40"}`}
+            >
+              <path
+                d="M8 28h24M12 28v-4a2 2 0 012-2h12a2 2 0 012 2v4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
-            <span className={`font-display text-[12px] ${isDragging ? "text-accent" : "text-text-muted/50"}`}>
+            <span
+              className={`font-display text-[12px] ${isDragging ? "text-accent" : "text-text-muted/50"}`}
+            >
               {isDragging ? "Release to add more" : "Drop more files here"}
             </span>
           </div>
@@ -79,9 +92,7 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
       {/* Outer border glow layer */}
       <div
         className={`absolute inset-0 rounded-xl transition-all duration-500 ${
-          isDragging
-            ? "bg-gradient-to-b from-accent/8 via-transparent to-ember/5"
-            : ""
+          isDragging ? "bg-gradient-to-b from-accent/8 via-transparent to-ember/5" : ""
         }`}
       />
 
