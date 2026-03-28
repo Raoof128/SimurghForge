@@ -19,6 +19,7 @@ function App() {
     updateProgress,
     resetFile,
     updateSize,
+    setOptions,
   } = useConversionQueue();
 
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
@@ -121,6 +122,7 @@ function App() {
           id: f.id,
           inputPath: f.path,
           outputFormat: f.outputFormat,
+          options: f.options,
         })),
         outputDir: settings.outputDir,
         maxConcurrency: settings.maxConcurrency,
@@ -138,7 +140,7 @@ function App() {
       if (file) {
         try {
           await convertBatch({
-            files: [{ id: file.id, inputPath: file.path, outputFormat: file.outputFormat }],
+            files: [{ id: file.id, inputPath: file.path, outputFormat: file.outputFormat, options: file.options }],
             outputDir: settings.outputDir,
             maxConcurrency: 1,
           });
@@ -270,6 +272,7 @@ function App() {
         onFormatChange={setOutputFormat}
         onRemove={removeFile}
         onRetry={handleRetry}
+        onOptionsChange={setOptions}
         onConvertAll={handleConvertAll}
         onClearQueue={() => { clearQueue(); setCompletionInfo(null); }}
         isConverting={isConverting}

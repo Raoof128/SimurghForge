@@ -3,7 +3,7 @@ use std::process::Stdio;
 use tauri::AppHandle;
 use tokio::process::Command;
 use tokio::io::{AsyncBufReadExt, BufReader};
-use crate::commands::convert::emit_progress;
+use crate::commands::convert::{emit_progress, ConversionOptions};
 
 async fn get_duration_us(input_path: &Path) -> Option<u64> {
     let output = Command::new("ffprobe")
@@ -25,7 +25,9 @@ pub async fn convert(
     output_path: &Path,
     app_handle: &AppHandle,
     file_id: &str,
+    options: &ConversionOptions,
 ) -> Result<(), String> {
+    let _ = options;
     emit_progress(app_handle, file_id, "converting", 5, None, None);
 
     let total_us = get_duration_us(input_path).await;

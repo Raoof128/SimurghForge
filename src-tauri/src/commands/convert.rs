@@ -7,12 +7,66 @@ use super::router::{self, Engine};
 use super::engines;
 use crate::utils::{mime, sanitise};
 
+#[derive(Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ImageOptions {
+    pub quality: Option<u8>,
+    pub max_width: Option<u32>,
+    pub max_height: Option<u32>,
+    pub dpi: Option<u32>,
+    pub strip_metadata: Option<bool>,
+}
+
+#[derive(Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct VideoOptions {
+    pub resolution: Option<String>,
+    pub bitrate: Option<u32>,
+    pub codec: Option<String>,
+    pub fps: Option<u32>,
+}
+
+#[derive(Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct AudioOptions {
+    pub sample_rate: Option<u32>,
+    pub bitrate: Option<u32>,
+    pub channels: Option<u8>,
+}
+
+#[derive(Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct PdfOptions {
+    pub compression: Option<String>,
+    pub image_dpi: Option<u32>,
+}
+
+#[derive(Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct DataOptions {
+    pub delimiter: Option<String>,
+    pub pretty_print: Option<bool>,
+    pub encoding: Option<String>,
+}
+
+#[derive(Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ConversionOptions {
+    pub preset: Option<String>,
+    pub image: Option<ImageOptions>,
+    pub video: Option<VideoOptions>,
+    pub audio: Option<AudioOptions>,
+    pub pdf: Option<PdfOptions>,
+    pub data: Option<DataOptions>,
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FileRequest {
     pub id: String,
     pub input_path: String,
     pub output_format: String,
+    pub options: Option<ConversionOptions>,
 }
 
 #[derive(Deserialize)]
@@ -111,14 +165,16 @@ pub async fn convert_batch(app: AppHandle, payload: ConvertBatchPayload) -> Resu
                 }
             };
 
+            let options = file.options.clone().unwrap_or_default();
+
             emit_progress(&app, &file.id, "converting", 10, None, None);
 
             let result = match engine {
-                Engine::ImageMagick => engines::imagemagick::convert(&input_path, &output_path, &app, &file.id).await,
-                Engine::FFmpeg => engines::ffmpeg::convert(&input_path, &output_path, &app, &file.id).await,
-                Engine::LibreOffice => engines::libreoffice::convert(&input_path, &output_path, &app, &file.id).await,
-                Engine::Pandoc => engines::pandoc::convert(&input_path, &output_path, &app, &file.id).await,
-                Engine::Pandas => engines::pandas::convert(&input_path, &output_path, &app, &file.id).await,
+                Engine::ImageMagick => engines::imagemagick::convert(&input_path, &output_path, &app, &file.id, &options).await,
+                Engine::FFmpeg => engines::ffmpeg::convert(&input_path, &output_path, &app, &file.id, &options).await,
+                Engine::LibreOffice => engines::libreoffice::convert(&input_path, &output_path, &app, &file.id, &options).await,
+                Engine::Pandoc => engines::pandoc::convert(&input_path, &output_path, &app, &file.id, &options).await,
+                Engine::Pandas => engines::pandas::convert(&input_path, &output_path, &app, &file.id, &options).await,
             };
 
             match result {

@@ -1,6 +1,8 @@
-import type { FileItem } from "../types/conversion";
+import { useState } from "react";
+import type { FileItem, ConversionOptions } from "../types/conversion";
 import { ProgressBar } from "./ProgressBar";
 import { FormatSelector } from "./FormatSelector";
+import { QualityControls } from "./QualityControls";
 import { openFile } from "../lib/ipc";
 
 interface FileCardProps {
@@ -8,6 +10,7 @@ interface FileCardProps {
   onFormatChange: (id: string, format: string) => void;
   onRemove: (id: string) => void;
   onRetry: (id: string) => void;
+  onOptionsChange: (id: string, options: ConversionOptions) => void;
   index: number;
 }
 
@@ -31,7 +34,8 @@ function getExtensionColor(ext: string): string {
   return "#D4922A"; // default amber for documents
 }
 
-export function FileCard({ file, onFormatChange, onRemove, onRetry, index }: FileCardProps) {
+export function FileCard({ file, onFormatChange, onRemove, onRetry, onOptionsChange, index }: FileCardProps) {
+  const [showQuality, setShowQuality] = useState(false);
   const isConverting = file.status === "converting";
   const isDone = file.status === "done";
   const isError = file.status === "error";
@@ -98,6 +102,25 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, index }: Fil
             disabled={!isQueued && !isError}
           />
 
+          {/* Quality settings button */}
+          {isQueued && (
+            <button
+              onClick={() => setShowQuality(!showQuality)}
+              className={`flex-shrink-0 w-6 h-6 rounded flex items-center justify-center
+                         transition-all duration-200
+                         ${showQuality ? "text-accent bg-accent/10" : "text-text-muted/40 hover:text-accent hover:bg-accent/5"}
+                         opacity-0 group-hover:opacity-100`}
+              title="Quality settings"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12">
+                <path d="M2 3h8M2 6h8M2 9h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                <circle cx="4" cy="3" r="1" fill="currentColor" />
+                <circle cx="8" cy="6" r="1" fill="currentColor" />
+                <circle cx="5" cy="9" r="1" fill="currentColor" />
+              </svg>
+            </button>
+          )}
+
           {/* Remove button */}
           {isQueued && (
             <button
@@ -113,6 +136,16 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, index }: Fil
             </button>
           )}
         </div>
+
+        {/* Quality controls */}
+        {showQuality && isQueued && (
+          <QualityControls
+            options={file.options}
+            outputFormat={file.outputFormat}
+            onChange={(opts) => onOptionsChange(file.id, opts)}
+            disabled={!isQueued}
+          />
+        )}
 
         {/* Progress bar during conversion */}
         {isConverting && (

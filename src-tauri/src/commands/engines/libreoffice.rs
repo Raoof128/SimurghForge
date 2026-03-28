@@ -1,7 +1,7 @@
 use std::path::Path;
 use tokio::process::Command;
 use tauri::AppHandle;
-use crate::commands::convert::emit_progress;
+use crate::commands::convert::{emit_progress, ConversionOptions};
 
 fn find_soffice() -> Result<String, String> {
     let candidates = [
@@ -22,7 +22,9 @@ pub async fn convert(
     output_path: &Path,
     app_handle: &AppHandle,
     file_id: &str,
+    options: &ConversionOptions,
 ) -> Result<(), String> {
+    let _ = options;
     let soffice = find_soffice()?;
 
     emit_progress(app_handle, file_id, "converting", 20, None, None);

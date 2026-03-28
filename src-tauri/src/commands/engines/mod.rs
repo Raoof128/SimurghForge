@@ -3,3 +3,7 @@ pub mod ffmpeg;
 pub mod libreoffice;
 pub mod pandoc;
 pub mod pandas;
+pub mod rust_image;
+pub mod rust_data;
+pub mod rust_audio;
+pub mod rust_pdf;

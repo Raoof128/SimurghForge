@@ -26,6 +26,15 @@ tauri-plugin-log = "2"
 tokio = { version = "1", features = ["full"] }
 tauri-plugin-dialog = "2.6.0"
 tauri-plugin-shell = "2.3.5"
+image = "0.25"
+ravif = "0.11"
+avif-decode = "1"
+symphonia = { version = "0.5", features = ["all"] }
+hound = "3.5"
+lopdf = "0.34"
+serde_yaml = "0.9"
+toml_edit = "0.22"
+quick-xml = { version = "0.37", features = ["serialize"] }
 
 [dev-dependencies]
 tempfile = "3"

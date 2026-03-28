@@ -1,5 +1,6 @@
 import { useReducer, useCallback } from "react";
-import type { FileItem, ConversionStatus } from "../types/conversion";
+import type { FileItem, ConversionStatus, ConversionOptions } from "../types/conversion";
+import { DEFAULT_OPTIONS } from "../types/conversion";
 import { getInputExtension, getOutputFormats } from "../lib/formatMap";
 
 type QueueAction =
@@ -16,7 +17,8 @@ type QueueAction =
       outputPath?: string;
     }
   | { type: "RESET_FILE"; id: string }
-  | { type: "UPDATE_SIZE"; path: string; size: number };
+  | { type: "UPDATE_SIZE"; path: string; size: number }
+  | { type: "SET_OPTIONS"; id: string; options: ConversionOptions };
 
 function queueReducer(state: FileItem[], action: QueueAction): FileItem[] {
   switch (action.type) {
@@ -56,6 +58,10 @@ function queueReducer(state: FileItem[], action: QueueAction): FileItem[] {
       return state.map((f) =>
         f.path === action.path ? { ...f, size: action.size } : f
       );
+    case "SET_OPTIONS":
+      return state.map((f) =>
+        f.id === action.id ? { ...f, options: action.options } : f
+      );
     default:
       return state;
   }
@@ -85,6 +91,7 @@ export function useConversionQueue() {
           outputFormat: formats[0],
           status: "queued",
           percent: 0,
+          options: DEFAULT_OPTIONS,
         });
       }
       if (newFiles.length > 0) {
@@ -132,6 +139,12 @@ export function useConversionQueue() {
     []
   );
 
+  const setOptions = useCallback(
+    (id: string, options: ConversionOptions) =>
+      dispatch({ type: "SET_OPTIONS", id, options }),
+    []
+  );
+
   return {
     files,
     addFiles,
@@ -141,5 +154,6 @@ export function useConversionQueue() {
     updateProgress,
     resetFile,
     updateSize,
+    setOptions,
   };
 }

@@ -1,13 +1,14 @@
 use std::path::Path;
 use tokio::process::Command;
 use tauri::AppHandle;
-use crate::commands::convert::emit_progress;
+use crate::commands::convert::{emit_progress, ConversionOptions};
 
 pub async fn convert(
     input_path: &Path,
     output_path: &Path,
     app_handle: &AppHandle,
     file_id: &str,
+    options: &ConversionOptions,
 ) -> Result<(), String> {
     let output_format = output_path
         .extension()
@@ -17,9 +18,9 @@ pub async fn convert(
     emit_progress(app_handle, file_id, "converting", 10, None, None);
 
     if output_format == "pdf" {
-        convert_via_libreoffice(input_path, output_path, app_handle, file_id).await
+        convert_via_libreoffice(input_path, output_path, app_handle, file_id, options).await
     } else {
-        convert_direct(input_path, output_path, app_handle, file_id).await
+        convert_direct(input_path, output_path, app_handle, file_id, options).await
     }
 }
 
@@ -28,7 +29,9 @@ async fn convert_direct(
     output_path: &Path,
     app_handle: &AppHandle,
     file_id: &str,
+    options: &ConversionOptions,
 ) -> Result<(), String> {
+    let _ = options;
     let output = Command::new("pandoc")
         .arg(input_path)
         .arg("-o").arg(output_path)
@@ -50,6 +53,7 @@ async fn convert_via_libreoffice(
     output_path: &Path,
     app_handle: &AppHandle,
     file_id: &str,
+    options: &ConversionOptions,
 ) -> Result<(), String> {
     // Step 1: Pandoc → temp DOCX
     let temp_dir = std::env::temp_dir();
@@ -75,6 +79,7 @@ async fn convert_via_libreoffice(
         output_path,
         app_handle,
         file_id,
+        options,
     ).await;
 
     // Cleanup temp

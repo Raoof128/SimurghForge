@@ -1,4 +1,4 @@
-import type { FileItem } from "../types/conversion";
+import type { FileItem, ConversionOptions } from "../types/conversion";
 import { FileCard } from "./FileCard";
 
 interface QueuePanelProps {
@@ -6,6 +6,7 @@ interface QueuePanelProps {
   onFormatChange: (id: string, format: string) => void;
   onRemove: (id: string) => void;
   onRetry: (id: string) => void;
+  onOptionsChange: (id: string, options: ConversionOptions) => void;
   onConvertAll: () => void;
   onClearQueue: () => void;
   isConverting: boolean;
@@ -16,6 +17,7 @@ export function QueuePanel({
   onFormatChange,
   onRemove,
   onRetry,
+  onOptionsChange,
   onConvertAll,
   onClearQueue,
   isConverting,
@@ -126,6 +128,7 @@ export function QueuePanel({
             onFormatChange={onFormatChange}
             onRemove={onRemove}
             onRetry={onRetry}
+            onOptionsChange={onOptionsChange}
             index={i}
           />
         ))}
