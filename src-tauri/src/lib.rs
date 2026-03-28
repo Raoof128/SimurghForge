@@ -25,13 +25,24 @@ async fn get_file_info(paths: Vec<String>) -> Result<Vec<FileInfo>, String> {
 
 #[tauri::command]
 async fn open_folder(path: String) -> Result<(), String> {
-    let p = Path::new(&path);
-    if p.exists() {
-        std::process::Command::new("open")
-            .arg(&path)
-            .spawn()
-            .map_err(|e| format!("Cannot open folder: {}", e))?;
+    // Resolve ~ to home directory
+    let resolved = if path.starts_with("~/") {
+        let home = std::env::var("HOME").map_err(|e| e.to_string())?;
+        format!("{}{}", home, &path[1..])
+    } else {
+        path.clone()
+    };
+
+    let p = Path::new(&resolved);
+    if !p.exists() {
+        return Err(format!("Path does not exist: {}", resolved));
     }
+
+    std::process::Command::new("/usr/bin/open")
+        .arg(&resolved)
+        .spawn()
+        .map_err(|e| format!("Cannot open: {}", e))?;
+
     Ok(())
 }
 

@@ -31,7 +31,14 @@ pub fn build_output_path(
     input_filename: &str,
     output_format: &str,
 ) -> Result<PathBuf, String> {
-    let dir = Path::new(output_dir);
+    // Resolve ~ to home directory
+    let resolved_dir = if output_dir.starts_with("~/") {
+        let home = std::env::var("HOME").unwrap_or_default();
+        format!("{}{}", home, &output_dir[1..])
+    } else {
+        output_dir.to_string()
+    };
+    let dir = Path::new(&resolved_dir);
     fs::create_dir_all(dir).map_err(|e| format!("Cannot create output dir: {}", e))?;
 
     let stem = Path::new(input_filename)
