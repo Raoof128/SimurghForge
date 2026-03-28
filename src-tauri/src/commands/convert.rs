@@ -7,6 +7,7 @@ use super::router::{self, Engine};
 use super::engines;
 use crate::utils::{mime, sanitise};
 
+#[allow(dead_code)]
 #[derive(Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct ImageOptions {
@@ -34,6 +35,7 @@ pub struct AudioOptions {
     pub channels: Option<u8>,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct PdfOptions {
@@ -41,6 +43,7 @@ pub struct PdfOptions {
     pub image_dpi: Option<u32>,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct DataOptions {
@@ -49,6 +52,7 @@ pub struct DataOptions {
     pub encoding: Option<String>,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct ConversionOptions {
