@@ -1,3 +1,4 @@
+import { open } from "@tauri-apps/plugin-dialog";
 import type { AppSettings } from "../types/conversion";
 
 interface SettingsProps {
@@ -9,6 +10,17 @@ interface SettingsProps {
 
 export function Settings({ settings, onSettingsChange, isOpen, onClose }: SettingsProps) {
   if (!isOpen) return null;
+
+  const handleBrowseOutputDir = async () => {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+      title: "Choose output directory",
+    });
+    if (selected && typeof selected === "string") {
+      onSettingsChange({ ...settings, outputDir: selected });
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end animate-fade-in" role="dialog" aria-label="Settings" aria-modal="true">
@@ -44,20 +56,36 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
             <label className="block font-display text-[10px] text-text-muted tracking-[0.15em] uppercase mb-2.5">
               Output Directory
             </label>
-            <input
-              type="text"
-              value={settings.outputDir}
-              onChange={(e) =>
-                onSettingsChange({ ...settings, outputDir: e.target.value })
-              }
-              className="w-full bg-bg-elevated/80 text-text-primary border border-text-muted/10 rounded-md
-                         px-3 py-2.5 text-xs font-display
-                         focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20
-                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40
-                         placeholder:text-text-muted/30
-                         transition-all duration-200"
-              placeholder="~/Downloads/SimurghForge/"
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={settings.outputDir}
+                onChange={(e) =>
+                  onSettingsChange({ ...settings, outputDir: e.target.value })
+                }
+                className="flex-1 min-w-0 bg-bg-elevated/80 text-text-primary border border-text-muted/10 rounded-md
+                           px-3 py-2.5 text-xs font-display
+                           focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40
+                           placeholder:text-text-muted/30
+                           transition-all duration-200"
+                placeholder="~/Downloads/SimurghForge/"
+              />
+              <button
+                onClick={handleBrowseOutputDir}
+                className="flex-shrink-0 w-10 h-10 rounded-md bg-bg-elevated/80 border border-text-muted/10
+                           flex items-center justify-center
+                           text-text-muted hover:text-accent hover:border-accent/40
+                           transition-all duration-200
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                title="Browse for folder"
+                aria-label="Browse for output folder"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <path d="M2 4h4l2 2h6v7H2V4z" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Max File Size */}
