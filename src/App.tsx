@@ -72,7 +72,6 @@ function App() {
         failed: event.failed,
         outputDir: event.outputDir,
       });
-      setTimeout(() => setCompletionInfo(null), 8000);
     }
   }, []);
 
@@ -272,7 +271,7 @@ function App() {
         onRemove={removeFile}
         onRetry={handleRetry}
         onConvertAll={handleConvertAll}
-        onClearQueue={clearQueue}
+        onClearQueue={() => { clearQueue(); setCompletionInfo(null); }}
         isConverting={isConverting}
       />
 
