@@ -17,6 +17,11 @@ export async function openFolder(path: string): Promise<void> {
   return invoke("open_folder", { path });
 }
 
+export async function openFile(path: string): Promise<void> {
+  // macOS `open` command works for both files and folders
+  return invoke("open_folder", { path });
+}
+
 export async function loadSettings(): Promise<Partial<AppSettings>> {
   const json: string = await invoke("load_settings");
   try {

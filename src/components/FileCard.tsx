@@ -1,6 +1,7 @@
 import type { FileItem } from "../types/conversion";
 import { ProgressBar } from "./ProgressBar";
 import { FormatSelector } from "./FormatSelector";
+import { openFile } from "../lib/ipc";
 
 interface FileCardProps {
   file: FileItem;
@@ -135,9 +136,26 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, index }: Fil
               <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" strokeWidth="1.2" />
               <path d="M4.5 7l2 2 3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span className="text-[11px] font-display text-success truncate">
+            <span className="text-[11px] font-display text-success truncate flex-1">
               {file.outputPath?.split("/").pop() ?? "Complete"}
             </span>
+            {file.outputPath && (
+              <button
+                onClick={() => openFile(file.outputPath!)}
+                className="flex-shrink-0 flex items-center gap-1 text-[10px] font-display text-accent tracking-wider uppercase
+                           border border-accent-dim/40 rounded px-2 py-0.5
+                           hover:bg-accent/10 hover:border-accent/40
+                           transition-all duration-200
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                aria-label={`Open ${file.outputPath.split("/").pop()}`}
+              >
+                <svg width="11" height="11" viewBox="0 0 12 12" className="opacity-70">
+                  <path d="M10 1H6.5M10 1v3.5M10 1L5.5 5.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M9 7v3a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1h3" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                </svg>
+                Open
+              </button>
+            )}
           </div>
         )}
 
