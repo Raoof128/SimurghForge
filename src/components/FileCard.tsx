@@ -54,7 +54,7 @@ export function FileCard({ file, onFormatChange, onRemove, onRetry, index }: Fil
     >
       {/* Forge heat shimmer overlay during conversion */}
       {isConverting && (
-        <div className="absolute inset-0 rounded-lg overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 rounded-lg pointer-events-none">
           <div className="absolute inset-0 forge-shimmer" />
         </div>
       )}

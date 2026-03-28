@@ -193,7 +193,7 @@ function App() {
             className="font-display text-[26px] font-bold tracking-tight leading-none"
             style={{
               color: "var(--color-accent)",
-              textShadow: "0 0 30px rgba(212, 146, 42, 0.2), 0 0 60px rgba(212, 146, 42, 0.08)",
+              textShadow: "0 0 30px rgba(232, 163, 62, 0.25), 0 0 60px rgba(232, 163, 62, 0.1)",
             }}
           >
             Simurgh Forge
