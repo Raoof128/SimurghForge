@@ -170,11 +170,15 @@ pub async fn convert_batch(app: AppHandle, payload: ConvertBatchPayload) -> Resu
             emit_progress(&app, &file.id, "converting", 10, None, None);
 
             let result = match engine {
-                Engine::ImageMagick => engines::imagemagick::convert(&input_path, &output_path, &app, &file.id, &options).await,
+                Engine::RustImage => engines::rust_image::convert(&input_path, &output_path, &app, &file.id, &options).await,
+                Engine::RustData => engines::rust_data::convert(&input_path, &output_path, &app, &file.id, &options).await,
+                Engine::RustAudio => engines::rust_audio::convert(&input_path, &output_path, &app, &file.id, &options).await,
+                Engine::RustPdf => engines::rust_pdf::convert(&input_path, &output_path, &app, &file.id, &options).await,
                 Engine::FFmpeg => engines::ffmpeg::convert(&input_path, &output_path, &app, &file.id, &options).await,
                 Engine::LibreOffice => engines::libreoffice::convert(&input_path, &output_path, &app, &file.id, &options).await,
                 Engine::Pandoc => engines::pandoc::convert(&input_path, &output_path, &app, &file.id, &options).await,
                 Engine::Pandas => engines::pandas::convert(&input_path, &output_path, &app, &file.id, &options).await,
+                Engine::ImageMagick => engines::imagemagick::convert(&input_path, &output_path, &app, &file.id, &options).await,
             };
 
             match result {

@@ -22,6 +22,17 @@ def read_data(input_path: str) -> pd.DataFrame:
             return pd.read_json(input_path)
         case ".parquet":
             return pd.read_parquet(input_path)
+        case ".sqlite" | ".db":
+            import sqlite3
+            conn = sqlite3.connect(input_path)
+            # Get the first table name
+            tables = pd.read_sql("SELECT name FROM sqlite_master WHERE type='table'", conn)
+            if tables.empty:
+                raise ValueError("No tables found in SQLite database")
+            table_name = tables.iloc[0]['name']
+            df = pd.read_sql(f"SELECT * FROM [{table_name}]", conn)
+            conn.close()
+            return df
         case _:
             raise ValueError(f"Unsupported input format: {ext}")
 
@@ -39,6 +50,11 @@ def write_data(df: pd.DataFrame, output_path: str) -> None:
             df.to_json(output_path, orient="records", indent=2)
         case ".parquet":
             df.to_parquet(output_path, index=False)
+        case ".sqlite" | ".db":
+            import sqlite3
+            conn = sqlite3.connect(output_path)
+            df.to_sql("data", conn, index=False, if_exists="replace")
+            conn.close()
         case _:
             raise ValueError(f"Unsupported output format: {ext}")
 

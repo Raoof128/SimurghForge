@@ -32,9 +32,23 @@ async fn convert_direct(
     options: &ConversionOptions,
 ) -> Result<(), String> {
     let _ = options;
-    let output = Command::new("pandoc")
-        .arg(input_path)
-        .arg("-o").arg(output_path)
+
+    let output_format = output_path
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+
+    let mut cmd = Command::new("pandoc");
+    cmd.arg(input_path)
+       .arg("-o").arg(output_path);
+
+    // Add --standalone for HTML output to include proper headers
+    if output_format == "html" {
+        cmd.arg("--standalone");
+    }
+
+    let output = cmd
         .output()
         .await
         .map_err(|e| format!("Failed to run Pandoc: {}", e))?;
