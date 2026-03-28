@@ -1,18 +1,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-base: #0C0C0E;
-  --color-bg-surface: #141416;
-  --color-bg-elevated: #1C1C1F;
+  --color-bg-base: #08080A;
+  --color-bg-surface: #111114;
+  --color-bg-elevated: #1A1A1E;
+  --color-bg-hover: #222228;
   --color-accent: #D4922A;
+  --color-accent-bright: #F0A830;
   --color-accent-dim: #7A4F0D;
+  --color-accent-glow: #D4922A40;
+  --color-ember: #E8621C;
+  --color-ember-dim: #8B3A10;
   --color-text-primary: #F0EAD6;
-  --color-text-muted: #6B6B6B;
+  --color-text-secondary: #B8B0A0;
+  --color-text-muted: #5A5A5A;
   --color-success: #3DAA6A;
+  --color-success-dim: #1A3D2A;
   --color-error: #C0392B;
+  --color-error-dim: #3D1A1A;
   --font-display: "JetBrains Mono", monospace;
   --font-body: "IBM Plex Sans", sans-serif;
 }
+
+/* ═══════════════════════════════════════════
+   Base & Atmosphere
+   ═══════════════════════════════════════════ */
 
 body {
   margin: 0;
@@ -25,15 +37,238 @@ body {
   user-select: none;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
+#root {
+  min-height: 100vh;
+  position: relative;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(212, 146, 42, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(232, 98, 28, 0.03) 0%, transparent 60%),
+    var(--color-bg-base);
 }
 
-::-webkit-scrollbar-track {
-  background: var(--color-bg-base);
+/* Noise overlay for industrial texture */
+#root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 100;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
 }
 
+/* Persian geometric lattice — very subtle */
+#root::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.012;
+  pointer-events: none;
+  z-index: 99;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='%23D4922A' stroke-width='0.5'/%3E%3Cpath d='M30 10L50 30L30 50L10 30Z' fill='none' stroke='%23D4922A' stroke-width='0.3'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
+}
+
+/* ═══════════════════════════════════════════
+   Scrollbar
+   ═══════════════════════════════════════════ */
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: var(--color-accent-dim);
   border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* ═══════════════════════════════════════════
+   Keyframe Animations
+   ═══════════════════════════════════════════ */
+
+@keyframes forge-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes molten-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes ember-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes heat-border {
+  0%, 100% {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 12px var(--color-accent-glow), inset 0 0 12px rgba(212, 146, 42, 0.03);
+  }
+  50% {
+    border-color: var(--color-ember);
+    box-shadow: 0 0 20px rgba(232, 98, 28, 0.3), inset 0 0 20px rgba(232, 98, 28, 0.04);
+  }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes forge-glow-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0 30px rgba(212, 146, 42, 0.08),
+      0 0 60px rgba(212, 146, 42, 0.04),
+      inset 0 1px 0 rgba(212, 146, 42, 0.06);
+  }
+  50% {
+    box-shadow:
+      0 0 40px rgba(212, 146, 42, 0.12),
+      0 0 80px rgba(212, 146, 42, 0.06),
+      inset 0 1px 0 rgba(212, 146, 42, 0.1);
+  }
+}
+
+@keyframes btn-forge-idle {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(212, 146, 42, 0.3), 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(212, 146, 42, 0.5), 0 2px 12px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@keyframes progress-glow {
+  0%, 100% {
+    box-shadow: 0 0 6px var(--color-accent), 0 0 12px var(--color-accent-glow);
+  }
+  50% {
+    box-shadow: 0 0 10px var(--color-ember), 0 0 20px rgba(232, 98, 28, 0.3);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   Utility Classes
+   ═══════════════════════════════════════════ */
+
+.animate-slide-up {
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease both;
+}
+
+.animate-heat-border {
+  animation: heat-border 2s ease-in-out infinite;
+}
+
+.animate-forge-glow {
+  animation: forge-glow-breathe 4s ease-in-out infinite;
+}
+
+.animate-btn-forge {
+  animation: btn-forge-idle 2.5s ease-in-out infinite;
+}
+
+.animate-progress-glow {
+  animation: progress-glow 1.8s ease-in-out infinite;
+}
+
+/* Molten progress bar fill */
+.molten-bar {
+  background: linear-gradient(
+    90deg,
+    var(--color-accent-dim) 0%,
+    var(--color-accent) 30%,
+    var(--color-accent-bright) 50%,
+    var(--color-accent) 70%,
+    var(--color-accent-dim) 100%
+  );
+  background-size: 200% 100%;
+  animation: molten-flow 2s ease-in-out infinite;
+}
+
+/* Shimmer overlay for drop zone */
+.forge-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 146, 42, 0.06) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: forge-shimmer 3s ease-in-out infinite;
+}
+
+/* Separator line with forge style */
+.forge-separator {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-accent-dim) 20%,
+    var(--color-accent) 50%,
+    var(--color-accent-dim) 80%,
+    transparent 100%
+  );
+  opacity: 0.3;
+}
+
+/* Custom range slider styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-bg-elevated);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: 2px solid var(--color-bg-surface);
+  box-shadow: 0 0 8px var(--color-accent-glow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 14px var(--color-accent-glow);
+}
+
+/* Select dropdown arrow */
+.forge-select {
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23D4922A' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
 }

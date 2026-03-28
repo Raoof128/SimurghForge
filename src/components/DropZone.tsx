@@ -34,24 +34,104 @@ export function DropZone({ onFilesDropped, fileCount }: DropZoneProps) {
 
   return (
     <div
-      className={`w-full max-w-2xl border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-default ${
-        isDragging
-          ? "border-accent bg-bg-elevated shadow-[0_0_24px_var(--color-accent-dim)]"
-          : "border-text-muted/30 hover:border-accent-dim"
+      className={`relative w-full max-w-2xl rounded-xl transition-all duration-500 cursor-default overflow-hidden ${
+        isDragging ? "animate-forge-glow" : ""
       }`}
     >
-      <div className="flex flex-col items-center gap-2">
-        <span className={`text-4xl transition-colors ${isDragging ? "text-accent" : "text-text-muted"}`}>
-          {isDragging ? "\u2B07" : "\u2693"}
-        </span>
-        <p className={`font-display text-sm ${isDragging ? "text-accent" : "text-text-muted"}`}>
-          {isDragging ? "Release to forge" : "Drop files here"}
-        </p>
-        {fileCount > 0 && (
-          <span className="bg-accent text-bg-base text-xs font-display font-bold rounded-full px-2 py-0.5 mt-1">
-            {fileCount} file{fileCount !== 1 ? "s" : ""} queued
-          </span>
-        )}
+      {/* Outer border glow layer */}
+      <div
+        className={`absolute inset-0 rounded-xl transition-all duration-500 ${
+          isDragging
+            ? "bg-gradient-to-b from-accent/8 via-transparent to-ember/5"
+            : ""
+        }`}
+      />
+
+      {/* Main drop area */}
+      <div
+        className={`relative border-2 border-dashed rounded-xl py-10 px-8 text-center transition-all duration-500 ${
+          isDragging
+            ? "border-accent/60 bg-accent/[0.03]"
+            : "border-text-muted/12 hover:border-accent-dim/30"
+        }`}
+      >
+        {/* Forge icon */}
+        <div className="flex flex-col items-center gap-3">
+          <div className={`transition-all duration-500 ${isDragging ? "scale-110" : ""}`}>
+            {isDragging ? (
+              /* Active: flame icon */
+              <svg width="40" height="40" viewBox="0 0 40 40" className="text-accent">
+                <path
+                  d="M20 4c0 0-8 10-8 20a8 8 0 0016 0C28 14 20 4 20 4z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="animate-ember-pulse"
+                  style={{ animation: "ember-pulse 1.2s ease-in-out infinite" }}
+                />
+                <path
+                  d="M20 16c0 0-3 4-3 8a3 3 0 006 0c0-4-3-8-3-8z"
+                  fill="currentColor"
+                  opacity="0.3"
+                />
+              </svg>
+            ) : (
+              /* Idle: anvil/forge icon */
+              <svg width="40" height="40" viewBox="0 0 40 40" className="text-text-muted/40">
+                <path
+                  d="M8 28h24M12 28v-4a2 2 0 012-2h12a2 2 0 012 2v4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M16 22v-6M24 22v-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  opacity="0.4"
+                />
+                <path
+                  d="M20 8v4M16 10h8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            )}
+          </div>
+
+          <div>
+            <p
+              className={`font-display text-sm tracking-wide transition-all duration-500 ${
+                isDragging ? "text-accent" : "text-text-muted/60"
+              }`}
+            >
+              {isDragging ? "Release to forge" : "Drop files here to begin"}
+            </p>
+            <p className="text-[10px] text-text-muted/30 mt-1 font-body">
+              Images, documents, audio, video, data
+            </p>
+          </div>
+
+          {fileCount > 0 && (
+            <div className="animate-slide-up mt-1">
+              <span
+                className="inline-flex items-center gap-1.5 bg-accent/10 text-accent text-[10px]
+                           font-display font-medium tracking-wider uppercase
+                           rounded-full px-3 py-1 border border-accent/15"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                {fileCount} file{fileCount !== 1 ? "s" : ""} queued
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

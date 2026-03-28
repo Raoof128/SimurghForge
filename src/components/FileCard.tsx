@@ -7,21 +7,8 @@ interface FileCardProps {
   onFormatChange: (id: string, format: string) => void;
   onRemove: (id: string) => void;
   onRetry: (id: string) => void;
+  index: number;
 }
-
-const STATUS_STYLES: Record<string, string> = {
-  queued:     "border-text-muted/30",
-  converting: "border-accent shadow-[0_0_12px_var(--color-accent-dim)]",
-  done:       "border-success",
-  error:      "border-error",
-};
-
-const STATUS_ICONS: Record<string, string> = {
-  queued:     "\u2022",
-  converting: "\u2699",
-  done:       "\u2713",
-  error:      "\u2717",
-};
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return "";
@@ -30,80 +17,150 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function FileCard({ file, onFormatChange, onRemove, onRetry }: FileCardProps) {
+function getExtensionColor(ext: string): string {
+  const imageExts = ["png", "jpg", "jpeg", "heic", "svg", "webp", "tiff", "bmp", "avif"];
+  const videoExts = ["mp4", "mov", "webm", "avi", "gif"];
+  const audioExts = ["mp3", "wav", "flac", "ogg", "aac", "m4a"];
+  const dataExts = ["csv", "xlsx", "json", "parquet", "tsv"];
+
+  if (imageExts.includes(ext)) return "#A78BFA"; // violet
+  if (videoExts.includes(ext)) return "#F472B6"; // pink
+  if (audioExts.includes(ext)) return "#34D399"; // emerald
+  if (dataExts.includes(ext)) return "#60A5FA"; // blue
+  return "#D4922A"; // default amber for documents
+}
+
+export function FileCard({ file, onFormatChange, onRemove, onRetry, index }: FileCardProps) {
   const isConverting = file.status === "converting";
   const isDone = file.status === "done";
   const isError = file.status === "error";
-  const isActive = isConverting || file.status === "queued";
+  const isQueued = file.status === "queued";
+  const extColor = getExtensionColor(file.inputFormat);
+
+  const cardClass = isConverting
+    ? "border-accent/60 animate-heat-border"
+    : isDone
+      ? "border-success/40 bg-success-dim/20"
+      : isError
+        ? "border-error/40 bg-error-dim/20"
+        : "border-text-muted/10 hover:border-accent-dim/40";
 
   return (
     <div
-      className={`bg-bg-surface border rounded-lg p-4 transition-all duration-300 ${STATUS_STYLES[file.status]}`}
+      className={`animate-slide-up group relative bg-bg-surface/80 backdrop-blur-sm border rounded-lg transition-all duration-300 ${cardClass}`}
+      style={{ animationDelay: `${index * 60}ms` }}
     >
-      <div className="flex items-center gap-3 mb-2">
-        <span
-          className={`text-lg ${
-            isDone ? "text-success" : isError ? "text-error" : isConverting ? "text-accent" : "text-text-muted"
-          }`}
-        >
-          {STATUS_ICONS[file.status]}
-        </span>
+      {/* Forge heat shimmer overlay during conversion */}
+      {isConverting && (
+        <div className="absolute inset-0 rounded-lg overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 forge-shimmer" />
+        </div>
+      )}
 
-        <div className="flex-1 min-w-0">
-          <p className="font-display text-sm text-text-primary truncate">
-            {file.name}
-          </p>
-          {file.size > 0 && (
-            <p className="text-xs text-text-muted">{formatFileSize(file.size)}</p>
+      <div className="relative p-3.5">
+        {/* Top row: extension badge, filename, arrow, format selector, remove */}
+        <div className="flex items-center gap-2.5">
+          {/* Extension badge */}
+          <div
+            className="flex-shrink-0 w-9 h-9 rounded-md flex items-center justify-center text-[10px] font-display font-bold uppercase tracking-wider"
+            style={{
+              backgroundColor: `${extColor}15`,
+              color: extColor,
+              border: `1px solid ${extColor}25`,
+            }}
+          >
+            {file.inputFormat.slice(0, 4)}
+          </div>
+
+          {/* Filename + size */}
+          <div className="flex-1 min-w-0">
+            <p className="font-display text-[13px] text-text-primary truncate leading-tight">
+              {file.name}
+            </p>
+            <p className="text-[10px] text-text-muted mt-0.5 font-body">
+              {file.size > 0 ? formatFileSize(file.size) : file.inputFormat.toUpperCase()}
+            </p>
+          </div>
+
+          {/* Arrow */}
+          <svg width="16" height="16" viewBox="0 0 16 16" className="flex-shrink-0 text-text-muted/40">
+            <path d="M3 8h10M10 5l3 3-3 3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+
+          {/* Format selector */}
+          <FormatSelector
+            filename={file.name}
+            selectedFormat={file.outputFormat}
+            onFormatChange={(fmt) => onFormatChange(file.id, fmt)}
+            disabled={!isQueued && !isError}
+          />
+
+          {/* Remove button */}
+          {isQueued && (
+            <button
+              onClick={() => onRemove(file.id)}
+              className="flex-shrink-0 w-6 h-6 rounded flex items-center justify-center
+                         text-text-muted/40 hover:text-error hover:bg-error/10
+                         opacity-0 group-hover:opacity-100 transition-all duration-200"
+              title="Remove"
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12">
+                <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
           )}
         </div>
 
-        <span className="text-text-muted text-xs font-display">{"\u2192"}</span>
+        {/* Progress bar during conversion */}
+        {isConverting && (
+          <div className="mt-3">
+            <ProgressBar percent={file.percent} isActive={true} />
+            <div className="flex items-center justify-between mt-1.5">
+              <span className="text-[10px] font-display text-accent tracking-wider">
+                FORGING
+              </span>
+              <span className="text-[10px] font-display text-accent-bright tabular-nums">
+                {file.percent}%
+              </span>
+            </div>
+          </div>
+        )}
 
-        <FormatSelector
-          filename={file.name}
-          selectedFormat={file.outputFormat}
-          onFormatChange={(fmt) => onFormatChange(file.id, fmt)}
-          disabled={!isActive && !isError}
-        />
+        {/* Done state */}
+        {isDone && (
+          <div className="mt-2.5 flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 14 14" className="text-success flex-shrink-0">
+              <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" strokeWidth="1.2" />
+              <path d="M4.5 7l2 2 3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-[11px] font-display text-success truncate">
+              {file.outputPath?.split("/").pop() ?? "Complete"}
+            </span>
+          </div>
+        )}
 
-        {isActive && (
-          <button
-            onClick={() => onRemove(file.id)}
-            className="text-text-muted hover:text-error transition-colors text-sm px-1"
-            title="Remove"
-          >
-            {"\u2715"}
-          </button>
+        {/* Error state */}
+        {isError && (
+          <div className="mt-2.5 flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 14 14" className="text-error flex-shrink-0">
+              <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" strokeWidth="1.2" />
+              <path d="M5 5l4 4M9 5l-4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+            </svg>
+            <span className="text-[11px] text-error/80 flex-1 truncate font-body">
+              {file.errorMsg ?? "Conversion failed"}
+            </span>
+            <button
+              onClick={() => onRetry(file.id)}
+              className="flex-shrink-0 text-[10px] font-display text-accent tracking-wider
+                         border border-accent-dim/40 rounded px-2 py-0.5
+                         hover:bg-accent/10 hover:border-accent/40
+                         transition-all duration-200"
+            >
+              RETRY
+            </button>
+          </div>
         )}
       </div>
-
-      {isConverting && (
-        <div className="mt-2">
-          <ProgressBar percent={file.percent} isActive={true} />
-          <p className="text-xs text-accent mt-1 font-display">{file.percent}%</p>
-        </div>
-      )}
-
-      {isDone && file.outputPath && (
-        <p className="text-xs text-success mt-1 font-display truncate">
-          Forged {"\u2192"} {file.outputPath.split("/").pop()}
-        </p>
-      )}
-
-      {isError && (
-        <div className="flex items-center gap-2 mt-2">
-          <p className="text-xs text-error flex-1 truncate">
-            {file.errorMsg ?? "Conversion failed"}
-          </p>
-          <button
-            onClick={() => onRetry(file.id)}
-            className="text-xs text-accent hover:text-text-primary border border-accent-dim rounded px-2 py-0.5 transition-colors font-display"
-          >
-            Retry
-          </button>
-        </div>
-      )}
     </div>
   );
 }

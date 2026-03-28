@@ -71,29 +71,52 @@ function App() {
   );
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-bg-base px-6 py-8">
-      <div className="flex items-center gap-4 mb-1 w-full max-w-2xl">
+    <div className="flex flex-col items-center min-h-screen px-6 py-7">
+      {/* Header */}
+      <header className="flex items-center gap-4 w-full max-w-2xl mb-1 animate-fade-in">
         <div className="flex-1">
-          <h1 className="font-display text-3xl font-bold text-accent tracking-tight">
+          {/* Title with ember glow */}
+          <h1
+            className="font-display text-[26px] font-bold tracking-tight leading-none"
+            style={{
+              color: "var(--color-accent)",
+              textShadow: "0 0 30px rgba(212, 146, 42, 0.2), 0 0 60px rgba(212, 146, 42, 0.08)",
+            }}
+          >
             Simurgh Forge
           </h1>
-          <p className="font-body text-text-muted text-sm">
+          <p className="font-body text-[11px] text-text-muted/50 mt-1 tracking-wide">
             Universal File Converter
           </p>
         </div>
+
+        {/* Settings button */}
         <button
           onClick={() => setSettingsOpen(true)}
-          className="text-text-muted hover:text-accent transition-colors font-display text-lg"
+          className="w-8 h-8 rounded-md flex items-center justify-center
+                     text-text-muted/30 hover:text-accent hover:bg-accent/5
+                     transition-all duration-200 border border-transparent
+                     hover:border-accent-dim/20"
           title="Settings"
         >
-          {"\u2699"}
+          <svg width="16" height="16" viewBox="0 0 16 16">
+            <circle cx="8" cy="8" r="2" fill="none" stroke="currentColor" strokeWidth="1.2" />
+            <path
+              d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4"
+              stroke="currentColor"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+            />
+          </svg>
         </button>
-      </div>
+      </header>
 
-      <div className="mt-6 w-full flex justify-center">
+      {/* Drop Zone */}
+      <div className="mt-5 w-full flex justify-center animate-fade-in" style={{ animationDelay: "100ms" }}>
         <DropZone onFilesDropped={addFiles} fileCount={files.length} />
       </div>
 
+      {/* Queue */}
       <QueuePanel
         files={files}
         onFormatChange={setOutputFormat}
@@ -104,6 +127,7 @@ function App() {
         isConverting={isConverting}
       />
 
+      {/* Settings */}
       <Settings
         settings={settings}
         onSettingsChange={setSettings}
