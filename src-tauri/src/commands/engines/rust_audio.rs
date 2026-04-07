@@ -1,14 +1,14 @@
+use crate::commands::convert::{emit_progress, ConversionOptions};
 use std::path::Path;
 use tauri::AppHandle;
-use crate::commands::convert::{emit_progress, ConversionOptions};
 
+use symphonia::core::audio::SampleBuffer;
 use symphonia::core::codecs::{DecoderOptions, CODEC_TYPE_NULL};
 use symphonia::core::errors::Error as SymphoniaError;
 use symphonia::core::formats::FormatOptions;
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
-use symphonia::core::audio::SampleBuffer;
 
 /// Native Rust audio engine: decodes any supported audio format and writes WAV output.
 ///
@@ -21,11 +21,7 @@ pub async fn convert(
     file_id: &str,
     options: &ConversionOptions,
 ) -> Result<(), String> {
-    let output_ext = output_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("")
-        .to_lowercase();
+    let output_ext = output_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
 
     // We can only write WAV natively. For everything else, fall back to FFmpeg.
     if output_ext != "wav" {
@@ -57,8 +53,8 @@ fn decode_and_write_wav(
     emit_progress(app_handle, file_id, "converting", 10, None, None);
 
     // Open the media source
-    let file = std::fs::File::open(input_path)
-        .map_err(|e| format!("Cannot open input file: {}", e))?;
+    let file =
+        std::fs::File::open(input_path).map_err(|e| format!("Cannot open input file: {}", e))?;
 
     let mss = MediaSourceStream::new(Box::new(file), Default::default());
 
@@ -90,17 +86,11 @@ fn decode_and_write_wav(
 
     // Extract source parameters
     let source_sample_rate = codec_params.sample_rate.unwrap_or(44100);
-    let source_channels = codec_params
-        .channels
-        .map(|c| c.count())
-        .unwrap_or(2) as u16;
+    let source_channels = codec_params.channels.map(|c| c.count()).unwrap_or(2) as u16;
 
     // Apply user-requested options, falling back to source parameters
-    let target_sample_rate = options
-        .audio
-        .as_ref()
-        .and_then(|a| a.sample_rate)
-        .unwrap_or(source_sample_rate);
+    let target_sample_rate =
+        options.audio.as_ref().and_then(|a| a.sample_rate).unwrap_or(source_sample_rate);
     let target_channels = options
         .audio
         .as_ref()
@@ -193,14 +183,10 @@ fn decode_and_write_wav(
         .map_err(|e| format!("Cannot create WAV file: {}", e))?;
 
     for sample in &final_samples {
-        writer
-            .write_sample(*sample)
-            .map_err(|e| format!("WAV write error: {}", e))?;
+        writer.write_sample(*sample).map_err(|e| format!("WAV write error: {}", e))?;
     }
 
-    writer
-        .finalize()
-        .map_err(|e| format!("WAV finalize error: {}", e))?;
+    writer.finalize().map_err(|e| format!("WAV finalize error: {}", e))?;
 
     emit_progress(app_handle, file_id, "converting", 95, None, None);
     Ok(())
@@ -223,10 +209,8 @@ fn convert_channels(samples: &[i16], src_channels: u16, dst_channels: u16) -> Ve
 
         if dst_ch == 1 {
             // Downmix to mono: average all source channels
-            let sum: i32 = samples[frame_start..frame_start + src_ch]
-                .iter()
-                .map(|&s| s as i32)
-                .sum();
+            let sum: i32 =
+                samples[frame_start..frame_start + src_ch].iter().map(|&s| s as i32).sum();
             out.push((sum / src_ch as i32) as i16);
         } else if dst_ch <= src_ch {
             // Take first dst_ch channels

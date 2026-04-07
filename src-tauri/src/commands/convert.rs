@@ -1,10 +1,10 @@
-use std::sync::Arc;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use tauri::{AppHandle, Emitter};
 use tokio::sync::Semaphore;
 
-use super::router::{self, Engine};
 use super::engines;
+use super::router::{self, Engine};
 use crate::utils::{mime, paths, sanitise};
 
 #[allow(dead_code)]
@@ -104,14 +104,24 @@ pub struct BatchCompleteEvent {
     pub output_dir: String,
 }
 
-pub fn emit_progress(app: &AppHandle, id: &str, status: &str, percent: u8, error_msg: Option<String>, output_path: Option<String>) {
-    let _ = app.emit("conversion_progress", ProgressEvent {
-        id: id.to_string(),
-        status: status.to_string(),
-        percent,
-        error_msg,
-        output_path,
-    });
+pub fn emit_progress(
+    app: &AppHandle,
+    id: &str,
+    status: &str,
+    percent: u8,
+    error_msg: Option<String>,
+    output_path: Option<String>,
+) {
+    let _ = app.emit(
+        "conversion_progress",
+        ProgressEvent {
+            id: id.to_string(),
+            status: status.to_string(),
+            percent,
+            error_msg,
+            output_path,
+        },
+    );
 }
 
 /// Matches frontend queue limit (`useConversionQueue`).
@@ -192,37 +202,95 @@ pub async fn convert_batch(app: AppHandle, payload: ConvertBatchPayload) -> Resu
                 }
             };
 
-            let input_filename = input_path.file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("output");
-            let output_path = match sanitise::build_output_path(&out_dir, input_filename, &file.output_format) {
-                Ok(p) => p,
-                Err(e) => {
-                    emit_progress(&app, &file.id, "error", 0, Some(e), None);
-                    err_count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                    return;
-                }
-            };
+            let input_filename =
+                input_path.file_name().and_then(|n| n.to_str()).unwrap_or("output");
+            let output_path =
+                match sanitise::build_output_path(&out_dir, input_filename, &file.output_format) {
+                    Ok(p) => p,
+                    Err(e) => {
+                        emit_progress(&app, &file.id, "error", 0, Some(e), None);
+                        err_count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                        return;
+                    }
+                };
 
             let options = file.options.clone().unwrap_or_default();
 
             emit_progress(&app, &file.id, "converting", 10, None, None);
 
             let result = match engine {
-                Engine::RustImage => engines::rust_image::convert(&input_path, &output_path, &app, &file.id, &options).await,
-                Engine::RustData => engines::rust_data::convert(&input_path, &output_path, &app, &file.id, &options).await,
-                Engine::RustAudio => engines::rust_audio::convert(&input_path, &output_path, &app, &file.id, &options).await,
-                Engine::RustPdf => engines::rust_pdf::convert(&input_path, &output_path, &app, &file.id, &options).await,
-                Engine::FFmpeg => engines::ffmpeg::convert(&input_path, &output_path, &app, &file.id, &options).await,
-                Engine::LibreOffice => engines::libreoffice::convert(&input_path, &output_path, &app, &file.id, &options).await,
-                Engine::Pandoc => engines::pandoc::convert(&input_path, &output_path, &app, &file.id, &options).await,
-                Engine::Pandas => engines::pandas::convert(&input_path, &output_path, &app, &file.id, &options).await,
-                Engine::ImageMagick => engines::imagemagick::convert(&input_path, &output_path, &app, &file.id, &options).await,
+                Engine::RustImage => {
+                    engines::rust_image::convert(
+                        &input_path,
+                        &output_path,
+                        &app,
+                        &file.id,
+                        &options,
+                    )
+                    .await
+                }
+                Engine::RustData => {
+                    engines::rust_data::convert(&input_path, &output_path, &app, &file.id, &options)
+                        .await
+                }
+                Engine::RustAudio => {
+                    engines::rust_audio::convert(
+                        &input_path,
+                        &output_path,
+                        &app,
+                        &file.id,
+                        &options,
+                    )
+                    .await
+                }
+                Engine::RustPdf => {
+                    engines::rust_pdf::convert(&input_path, &output_path, &app, &file.id, &options)
+                        .await
+                }
+                Engine::FFmpeg => {
+                    engines::ffmpeg::convert(&input_path, &output_path, &app, &file.id, &options)
+                        .await
+                }
+                Engine::LibreOffice => {
+                    engines::libreoffice::convert(
+                        &input_path,
+                        &output_path,
+                        &app,
+                        &file.id,
+                        &options,
+                    )
+                    .await
+                }
+                Engine::Pandoc => {
+                    engines::pandoc::convert(&input_path, &output_path, &app, &file.id, &options)
+                        .await
+                }
+                Engine::Pandas => {
+                    engines::pandas::convert(&input_path, &output_path, &app, &file.id, &options)
+                        .await
+                }
+                Engine::ImageMagick => {
+                    engines::imagemagick::convert(
+                        &input_path,
+                        &output_path,
+                        &app,
+                        &file.id,
+                        &options,
+                    )
+                    .await
+                }
             };
 
             match result {
                 Ok(()) => {
-                    emit_progress(&app, &file.id, "done", 100, None, Some(output_path.to_string_lossy().to_string()));
+                    emit_progress(
+                        &app,
+                        &file.id,
+                        "done",
+                        100,
+                        None,
+                        Some(output_path.to_string_lossy().to_string()),
+                    );
                     ok_count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 }
                 Err(e) => {
@@ -243,12 +311,10 @@ pub async fn convert_batch(app: AppHandle, payload: ConvertBatchPayload) -> Resu
 
     let ok = succeeded.load(std::sync::atomic::Ordering::Relaxed);
     let err = failed.load(std::sync::atomic::Ordering::Relaxed);
-    let _ = app.emit("batch_complete", BatchCompleteEvent {
-        total_files: total,
-        succeeded: ok,
-        failed: err,
-        output_dir,
-    });
+    let _ = app.emit(
+        "batch_complete",
+        BatchCompleteEvent { total_files: total, succeeded: ok, failed: err, output_dir },
+    );
 
     Ok(())
 }

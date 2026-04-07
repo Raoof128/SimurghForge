@@ -1,7 +1,7 @@
-use std::path::Path;
-use std::fs;
-use tauri::AppHandle;
 use crate::commands::convert::{emit_progress, ConversionOptions};
+use std::fs;
+use std::path::Path;
+use tauri::AppHandle;
 
 /// Native Rust PDF engine using lopdf.
 ///
@@ -17,16 +17,8 @@ pub async fn convert(
     file_id: &str,
     options: &ConversionOptions,
 ) -> Result<(), String> {
-    let input_ext = input_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("")
-        .to_lowercase();
-    let output_ext = output_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("")
-        .to_lowercase();
+    let input_ext = input_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+    let output_ext = output_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
 
     // We only handle PDF -> TXT natively
     if input_ext == "pdf" && output_ext == "txt" {
@@ -65,8 +57,7 @@ fn extract_text_blocking(
 ) -> Result<(), String> {
     emit_progress(app_handle, file_id, "converting", 10, None, None);
 
-    let doc = lopdf::Document::load(input_path)
-        .map_err(|e| format!("Cannot open PDF: {}", e))?;
+    let doc = lopdf::Document::load(input_path).map_err(|e| format!("Cannot open PDF: {}", e))?;
 
     emit_progress(app_handle, file_id, "converting", 30, None, None);
 
@@ -85,9 +76,7 @@ fn extract_text_blocking(
     let page_numbers: Vec<u32> = pages.keys().copied().collect();
 
     for (i, &page_num) in page_numbers.iter().enumerate() {
-        let page_text = doc
-            .extract_text(&[page_num])
-            .unwrap_or_default();
+        let page_text = doc.extract_text(&[page_num]).unwrap_or_default();
 
         if !page_text.trim().is_empty() {
             if !text.is_empty() {

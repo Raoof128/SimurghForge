@@ -1,8 +1,8 @@
-use std::path::Path;
-use std::fs;
-use image::{DynamicImage, ImageFormat, imageops::FilterType};
-use tauri::AppHandle;
 use crate::commands::convert::{emit_progress, ConversionOptions};
+use image::{imageops::FilterType, DynamicImage, ImageFormat};
+use std::fs;
+use std::path::Path;
+use tauri::AppHandle;
 
 /// Detect the image format from a file extension.
 fn detect_image_format(path: &Path) -> Result<ImageFormat, String> {
@@ -35,8 +35,8 @@ pub async fn convert(
     emit_progress(app_handle, file_id, "converting", 10, None, None);
 
     // Load image
-    let mut img: DynamicImage = image::open(input_path)
-        .map_err(|e| format!("Cannot open image: {}", e))?;
+    let mut img: DynamicImage =
+        image::open(input_path).map_err(|e| format!("Cannot open image: {}", e))?;
 
     emit_progress(app_handle, file_id, "converting", 30, None, None);
 
@@ -55,11 +55,7 @@ pub async fn convert(
 
     // Determine output format
     let out_format = detect_image_format(output_path)?;
-    let quality = options
-        .image
-        .as_ref()
-        .and_then(|o| o.quality)
-        .unwrap_or(95);
+    let quality = options.image.as_ref().and_then(|o| o.quality).unwrap_or(95);
 
     // Ensure parent directory exists
     if let Some(parent) = output_path.parent() {
@@ -72,22 +68,18 @@ pub async fn convert(
             let file =
                 fs::File::create(output_path).map_err(|e| format!("Cannot create file: {}", e))?;
             let encoder = image::codecs::jpeg::JpegEncoder::new_with_quality(file, quality);
-            img.write_with_encoder(encoder)
-                .map_err(|e| format!("JPEG encode error: {}", e))?;
+            img.write_with_encoder(encoder).map_err(|e| format!("JPEG encode error: {}", e))?;
         }
         ImageFormat::WebP => {
             // image 0.25 supports WebP writing natively
-            img.save(output_path)
-                .map_err(|e| format!("WebP save error: {}", e))?;
+            img.save(output_path).map_err(|e| format!("WebP save error: {}", e))?;
         }
         ImageFormat::Avif => {
             // image 0.25 with ravif supports AVIF writing natively
-            img.save(output_path)
-                .map_err(|e| format!("AVIF save error: {}", e))?;
+            img.save(output_path).map_err(|e| format!("AVIF save error: {}", e))?;
         }
         _ => {
-            img.save(output_path)
-                .map_err(|e| format!("Image save error: {}", e))?;
+            img.save(output_path).map_err(|e| format!("Image save error: {}", e))?;
         }
     }
 

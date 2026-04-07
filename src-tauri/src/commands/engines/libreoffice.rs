@@ -1,12 +1,10 @@
-use std::path::Path;
-use tokio::process::Command;
-use tauri::AppHandle;
 use crate::commands::convert::{emit_progress, ConversionOptions};
+use std::path::Path;
+use tauri::AppHandle;
+use tokio::process::Command;
 
 fn find_soffice() -> Result<String, String> {
-    let candidates = [
-        "/Applications/LibreOffice.app/Contents/MacOS/soffice",
-    ];
+    let candidates = ["/Applications/LibreOffice.app/Contents/MacOS/soffice"];
 
     for path in &candidates {
         if Path::new(path).exists() {
@@ -29,19 +27,17 @@ pub async fn convert(
 
     emit_progress(app_handle, file_id, "converting", 20, None, None);
 
-    let output_format = output_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .ok_or("Cannot determine output format")?;
+    let output_format =
+        output_path.extension().and_then(|e| e.to_str()).ok_or("Cannot determine output format")?;
 
-    let output_dir = output_path
-        .parent()
-        .ok_or("Cannot determine output directory")?;
+    let output_dir = output_path.parent().ok_or("Cannot determine output directory")?;
 
     let output = Command::new(&soffice)
         .arg("--headless")
-        .arg("--convert-to").arg(output_format)
-        .arg("--outdir").arg(output_dir)
+        .arg("--convert-to")
+        .arg(output_format)
+        .arg("--outdir")
+        .arg(output_dir)
         .arg(input_path)
         .output()
         .await

@@ -1,14 +1,14 @@
 #[derive(Debug, Clone, PartialEq)]
 pub enum Engine {
-    RustImage,      // image crate — PNG, JPG, WebP, AVIF, TIFF, BMP, ICO, GIF
-    RustData,       // serde — JSON, YAML, TOML, XML, CSV, TSV
-    RustAudio,      // symphonia+hound — any audio → WAV
-    RustPdf,        // lopdf — PDF → TXT
-    FFmpeg,         // video, audio encode, thumbnails, waveforms
-    LibreOffice,    // DOCX, PPTX, ODT, RTF, complex PDF
-    Pandoc,         // MD, LaTeX, ePub, HTML, TXT markup
-    Pandas,         // XLSX, Parquet, SQLite
-    ImageMagick,    // fallback for images RustImage can't handle (e.g. RAW)
+    RustImage,   // image crate — PNG, JPG, WebP, AVIF, TIFF, BMP, ICO, GIF
+    RustData,    // serde — JSON, YAML, TOML, XML, CSV, TSV
+    RustAudio,   // symphonia+hound — any audio → WAV
+    RustPdf,     // lopdf — PDF → TXT
+    FFmpeg,      // video, audio encode, thumbnails, waveforms
+    LibreOffice, // DOCX, PPTX, ODT, RTF, complex PDF
+    Pandoc,      // MD, LaTeX, ePub, HTML, TXT markup
+    Pandas,      // XLSX, Parquet, SQLite
+    ImageMagick, // fallback for images RustImage can't handle (e.g. RAW)
 }
 
 pub fn route(input_type: &str, output_format: &str) -> Result<Engine, String> {

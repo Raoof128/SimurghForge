@@ -1,7 +1,7 @@
-use std::path::Path;
-use tokio::process::Command;
-use tauri::AppHandle;
 use crate::commands::convert::{emit_progress, ConversionOptions};
+use std::path::Path;
+use tauri::AppHandle;
+use tokio::process::Command;
 
 pub async fn convert(
     input_path: &Path,
@@ -10,10 +10,8 @@ pub async fn convert(
     file_id: &str,
     options: &ConversionOptions,
 ) -> Result<(), String> {
-    let output_format = output_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .ok_or("Cannot determine output format")?;
+    let output_format =
+        output_path.extension().and_then(|e| e.to_str()).ok_or("Cannot determine output format")?;
 
     emit_progress(app_handle, file_id, "converting", 10, None, None);
 
@@ -33,25 +31,18 @@ async fn convert_direct(
 ) -> Result<(), String> {
     let _ = options;
 
-    let output_format = output_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("")
-        .to_lowercase();
+    let output_format =
+        output_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
 
     let mut cmd = Command::new("pandoc");
-    cmd.arg(input_path)
-       .arg("-o").arg(output_path);
+    cmd.arg(input_path).arg("-o").arg(output_path);
 
     // Add --standalone for HTML output to include proper headers
     if output_format == "html" {
         cmd.arg("--standalone");
     }
 
-    let output = cmd
-        .output()
-        .await
-        .map_err(|e| format!("Failed to run Pandoc: {}", e))?;
+    let output = cmd.output().await.map_err(|e| format!("Failed to run Pandoc: {}", e))?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
@@ -75,7 +66,8 @@ async fn convert_via_libreoffice(
 
     let pandoc_output = Command::new("pandoc")
         .arg(input_path)
-        .arg("-o").arg(&temp_docx)
+        .arg("-o")
+        .arg(&temp_docx)
         .output()
         .await
         .map_err(|e| format!("Failed to run Pandoc: {}", e))?;
@@ -88,13 +80,8 @@ async fn convert_via_libreoffice(
     emit_progress(app_handle, file_id, "converting", 50, None, None);
 
     // Step 2: LibreOffice temp DOCX → PDF
-    let result = super::libreoffice::convert(
-        &temp_docx,
-        output_path,
-        app_handle,
-        file_id,
-        options,
-    ).await;
+    let result =
+        super::libreoffice::convert(&temp_docx, output_path, app_handle, file_id, options).await;
 
     // Cleanup temp
     let _ = std::fs::remove_file(&temp_docx);

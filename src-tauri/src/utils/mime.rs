@@ -1,6 +1,6 @@
-use std::path::Path;
 use std::fs::File;
 use std::io::Read;
+use std::path::Path;
 
 pub fn detect_type(path: &Path) -> Result<String, String> {
     let mut file = File::open(path).map_err(|e| format!("Cannot open file: {}", e))?;
@@ -60,10 +60,7 @@ mod tests {
     use std::io::Write;
 
     fn write_temp(ext: &str, bytes: &[u8]) -> tempfile::NamedTempFile {
-        let mut f = tempfile::Builder::new()
-            .suffix(&format!(".{}", ext))
-            .tempfile()
-            .unwrap();
+        let mut f = tempfile::Builder::new().suffix(&format!(".{}", ext)).tempfile().unwrap();
         f.write_all(bytes).unwrap();
         f.flush().unwrap();
         f

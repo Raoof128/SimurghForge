@@ -12,9 +12,7 @@ pub const ABSOLUTE_MAX_INPUT_FILE_BYTES: u64 = 2000 * 1024 * 1024;
 /// True when the path contains a `..` path component (directory traversal).  
 /// Filenames like `file..name.png` are allowed (no `ParentDir` component).
 pub fn path_has_parent_dir_component(path: &str) -> bool {
-    Path::new(path)
-        .components()
-        .any(|c| matches!(c, Component::ParentDir))
+    Path::new(path).components().any(|c| matches!(c, Component::ParentDir))
 }
 
 pub fn validate_input(path: &str, max_size: u64) -> Result<PathBuf, String> {
@@ -22,21 +20,16 @@ pub fn validate_input(path: &str, max_size: u64) -> Result<PathBuf, String> {
         return Err("Path traversal detected".into());
     }
 
-    let canonical = fs::canonicalize(path)
-        .map_err(|e| format!("Invalid path '{}': {}", path, e))?;
+    let canonical =
+        fs::canonicalize(path).map_err(|e| format!("Invalid path '{}': {}", path, e))?;
 
     if !canonical.is_file() {
         return Err(format!("Not a file: {}", canonical.display()));
     }
 
-    let metadata = fs::metadata(&canonical)
-        .map_err(|e| format!("Cannot read metadata: {}", e))?;
+    let metadata = fs::metadata(&canonical).map_err(|e| format!("Cannot read metadata: {}", e))?;
     if metadata.len() > max_size {
-        return Err(format!(
-            "File too large: {} bytes (max: {} bytes)",
-            metadata.len(),
-            max_size
-        ));
+        return Err(format!("File too large: {} bytes (max: {} bytes)", metadata.len(), max_size));
     }
 
     Ok(canonical)
@@ -66,10 +59,8 @@ pub fn build_output_path(
     let dir = Path::new(&resolved_dir);
     fs::create_dir_all(dir).map_err(|e| format!("Cannot create output dir: {}", e))?;
 
-    let stem = Path::new(input_filename)
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .ok_or("Invalid filename")?;
+    let stem =
+        Path::new(input_filename).file_stem().and_then(|s| s.to_str()).ok_or("Invalid filename")?;
 
     let clean: String = stem
         .chars()

@@ -1,7 +1,7 @@
-use std::path::Path;
-use std::fs;
-use tauri::AppHandle;
 use crate::commands::convert::{emit_progress, ConversionOptions};
+use std::fs;
+use std::path::Path;
+use tauri::AppHandle;
 
 pub async fn convert(
     input_path: &Path,
@@ -10,28 +10,17 @@ pub async fn convert(
     file_id: &str,
     options: &ConversionOptions,
 ) -> Result<(), String> {
-    let input_ext = input_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("")
-        .to_lowercase();
-    let output_ext = output_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("")
-        .to_lowercase();
+    let input_ext = input_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+    let output_ext = output_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
 
     emit_progress(app_handle, file_id, "converting", 10, None, None);
 
     // Read input file
-    let content =
-        fs::read_to_string(input_path).map_err(|e| format!("Cannot read file: {}", e))?;
+    let content = fs::read_to_string(input_path).map_err(|e| format!("Cannot read file: {}", e))?;
 
     // Parse input into a serde_json::Value as a universal intermediate representation
     let value: serde_json::Value = match input_ext.as_str() {
-        "json" => {
-            serde_json::from_str(&content).map_err(|e| format!("Invalid JSON: {}", e))?
-        }
+        "json" => serde_json::from_str(&content).map_err(|e| format!("Invalid JSON: {}", e))?,
         "yaml" | "yml" => {
             serde_yaml::from_str(&content).map_err(|e| format!("Invalid YAML: {}", e))?
         }
@@ -68,11 +57,7 @@ pub async fn convert(
 
     emit_progress(app_handle, file_id, "converting", 50, None, None);
 
-    let pretty = options
-        .data
-        .as_ref()
-        .and_then(|d| d.pretty_print)
-        .unwrap_or(true);
+    let pretty = options.data.as_ref().and_then(|d| d.pretty_print).unwrap_or(true);
 
     // Ensure parent directory exists
     if let Some(parent) = output_path.parent() {
@@ -134,9 +119,7 @@ fn json_to_toml(value: &serde_json::Value) -> Result<String, String> {
 
 /// Convert a serde_json::Value (expected array of objects) to CSV/TSV.
 fn json_to_csv(value: &serde_json::Value, delimiter: u8) -> Result<String, String> {
-    let arr = value
-        .as_array()
-        .ok_or("CSV output requires a JSON array")?;
+    let arr = value.as_array().ok_or("CSV output requires a JSON array")?;
     if arr.is_empty() {
         return Ok(String::new());
     }
@@ -157,9 +140,7 @@ fn json_to_csv(value: &serde_json::Value, delimiter: u8) -> Result<String, Strin
         return Err("CSV requires array of objects".into());
     }
 
-    let mut wtr = csv::WriterBuilder::new()
-        .delimiter(delimiter)
-        .from_writer(Vec::new());
+    let mut wtr = csv::WriterBuilder::new().delimiter(delimiter).from_writer(Vec::new());
 
     // Write headers
     wtr.write_record(&headers).map_err(|e| e.to_string())?;
@@ -189,9 +170,7 @@ fn json_to_csv(value: &serde_json::Value, delimiter: u8) -> Result<String, Strin
 
 /// Parse CSV/TSV content into a JSON array of objects.
 fn csv_to_json(content: &str, delimiter: u8) -> Result<serde_json::Value, String> {
-    let mut rdr = csv::ReaderBuilder::new()
-        .delimiter(delimiter)
-        .from_reader(content.as_bytes());
+    let mut rdr = csv::ReaderBuilder::new().delimiter(delimiter).from_reader(content.as_bytes());
 
     let headers: Vec<String> = rdr
         .headers()

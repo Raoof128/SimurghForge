@@ -7,6 +7,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Raouf: 2026-04-07 (Australia/Sydney) — CI: npm install + rustfmt
+
+- **Scope:** Root npm config; Rust formatting across `src-tauri/`.
+- **Summary:** Added `.npmrc` with `legacy-peer-deps=true` so **`npm ci`** on GitHub Actions succeeds despite ESLint 10 and TypeScript 6 sitting outside the peer ranges declared by some plugins (same resolution as a tolerant local install). Ran **`cargo fmt`** on the Tauri crate so **`cargo fmt --check`** matches CI.
+- **Files:** `.npmrc`; `src-tauri/build.rs`, `src-tauri/src/**/*.rs` (rustfmt-only edits).
+- **Verification:** `rm -rf node_modules && npm ci`; `npm run check`; `cd src-tauri && cargo fmt --all -- --check && cargo clippy --all-targets -- -D warnings && cargo test`.
+- **Follow-ups:** When upstream plugins widen peer ranges for ESLint 9+ and TypeScript 6, consider dropping `legacy-peer-deps` and regenerating the lockfile.
+
 ### Raouf: 2026-04-07 (Australia/Sydney)
 
 - **Scope:** Frontend (`src/`), HTML shell, i18n, build tooling; **Rust** (`src-tauri/`).

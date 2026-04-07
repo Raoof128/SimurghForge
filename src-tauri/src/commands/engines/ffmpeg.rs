@@ -1,15 +1,18 @@
+use crate::commands::convert::{emit_progress, ConversionOptions};
 use std::path::Path;
 use std::process::Stdio;
 use tauri::AppHandle;
-use tokio::process::Command;
 use tokio::io::{AsyncBufReadExt, BufReader};
-use crate::commands::convert::{emit_progress, ConversionOptions};
+use tokio::process::Command;
 
 async fn get_duration_us(input_path: &Path) -> Option<u64> {
     let output = Command::new("ffprobe")
-        .arg("-v").arg("error")
-        .arg("-show_entries").arg("format=duration")
-        .arg("-of").arg("csv=p=0")
+        .arg("-v")
+        .arg("error")
+        .arg("-show_entries")
+        .arg("format=duration")
+        .arg("-of")
+        .arg("csv=p=0")
         .arg(input_path)
         .output()
         .await
@@ -22,16 +25,8 @@ async fn get_duration_us(input_path: &Path) -> Option<u64> {
 
 /// Check if this is a video thumbnail extraction (video input -> image output).
 fn is_video_thumbnail(input_path: &Path, output_path: &Path) -> bool {
-    let input_ext = input_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("")
-        .to_lowercase();
-    let output_ext = output_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("")
-        .to_lowercase();
+    let input_ext = input_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+    let output_ext = output_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
 
     let video_exts = ["mp4", "mov", "webm", "mkv", "avi"];
     let image_exts = ["jpg", "jpeg", "png"];
@@ -41,16 +36,8 @@ fn is_video_thumbnail(input_path: &Path, output_path: &Path) -> bool {
 
 /// Check if this is an audio waveform generation (audio input -> image output).
 fn is_audio_waveform(input_path: &Path, output_path: &Path) -> bool {
-    let input_ext = input_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("")
-        .to_lowercase();
-    let output_ext = output_path
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("")
-        .to_lowercase();
+    let input_ext = input_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+    let output_ext = output_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
 
     let audio_exts = ["mp3", "wav", "flac", "ogg", "aac", "opus", "m4a"];
     let image_exts = ["png", "jpg", "jpeg"];
@@ -126,9 +113,7 @@ pub async fn convert(
         }
     }
 
-    cmd.arg("-progress").arg("pipe:1")
-       .arg("-nostats")
-       .arg(output_path);
+    cmd.arg("-progress").arg("pipe:1").arg("-nostats").arg(output_path);
 
     let mut child = cmd
         .stdout(Stdio::piped())
@@ -175,9 +160,12 @@ async fn convert_thumbnail(
 
     let output = Command::new("ffmpeg")
         .arg("-y")
-        .arg("-i").arg(input_path)
-        .arg("-ss").arg("00:00:01")
-        .arg("-frames:v").arg("1")
+        .arg("-i")
+        .arg(input_path)
+        .arg("-ss")
+        .arg("00:00:01")
+        .arg("-frames:v")
+        .arg("1")
         .arg(output_path)
         .output()
         .await
@@ -203,9 +191,12 @@ async fn convert_waveform(
 
     let output = Command::new("ffmpeg")
         .arg("-y")
-        .arg("-i").arg(input_path)
-        .arg("-filter_complex").arg("showwavespic=s=800x200:colors=#E8A33E")
-        .arg("-frames:v").arg("1")
+        .arg("-i")
+        .arg(input_path)
+        .arg("-filter_complex")
+        .arg("showwavespic=s=800x200:colors=#E8A33E")
+        .arg("-frames:v")
+        .arg("1")
         .arg(output_path)
         .output()
         .await

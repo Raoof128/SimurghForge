@@ -38,11 +38,7 @@ pub fn expand_tilde(path: &str) -> Result<String, String> {
 /// Default output folder: `~/Downloads/SimurghForge` (matches `get_default_output_dir` command).
 pub fn default_output_dir_string() -> Result<String, String> {
     let home = home_dir()?;
-    Ok(home
-        .join("Downloads")
-        .join("SimurghForge")
-        .to_string_lossy()
-        .into_owned())
+    Ok(home.join("Downloads").join("SimurghForge").to_string_lossy().into_owned())
 }
 
 /// Best-effort open of a file or folder with the system default handler (Finder, Explorer, xdg-open, …).

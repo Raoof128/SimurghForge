@@ -1,13 +1,10 @@
-use std::path::Path;
-use tokio::process::Command;
-use tauri::AppHandle;
 use crate::commands::convert::{emit_progress, ConversionOptions};
+use std::path::Path;
+use tauri::AppHandle;
+use tokio::process::Command;
 
 fn find_script() -> Result<String, String> {
-    let candidates = [
-        "scripts/pandas_convert.py",
-        "../scripts/pandas_convert.py",
-    ];
+    let candidates = ["scripts/pandas_convert.py", "../scripts/pandas_convert.py"];
 
     for path in &candidates {
         if Path::new(path).exists() {

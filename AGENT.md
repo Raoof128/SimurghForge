@@ -14,6 +14,7 @@
 
 ## Verification
 
+- **`npm ci`** uses **`.npmrc`** (`legacy-peer-deps=true`) so CI matches installs when ESLint/TypeScript majors exceed plugin peer ranges; run a clean install occasionally to mirror CI.
 - Run **`npm run check`** before claiming work is complete (typecheck, lint, Prettier, Vite build).
 - For Rust changes: **`npm run test:rust`** and **`npm run clippy`** (`-D warnings`).
 - Prefer **`npm run fmt:rust`** after editing Rust.
@@ -23,6 +24,10 @@
 - Append notable changes to `CHANGELOG.md` with the Raouf template when modifying behaviour or UX.
 
 ---
+
+### Raouf: 2026-04-07 — CI (npm + rustfmt)
+
+- See `CHANGELOG.md` under **[Unreleased]** — **CI: npm install + rustfmt** (`.npmrc`, `cargo fmt` across `src-tauri/`).
 
 ### Raouf: 2026-04-07 — Frontend hardening
 

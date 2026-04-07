@@ -20,10 +20,7 @@ async fn get_file_info(paths: Vec<String>) -> Result<Vec<FileInfo>, String> {
             return Err("Path traversal detected".into());
         }
         let meta = std::fs::metadata(&p).map_err(|e| format!("Cannot read {}: {}", p, e))?;
-        results.push(FileInfo {
-            path: p,
-            size: meta.len(),
-        });
+        results.push(FileInfo { path: p, size: meta.len() });
     }
     Ok(results)
 }
@@ -42,10 +39,7 @@ async fn open_folder(path: String) -> Result<(), String> {
 #[tauri::command]
 async fn load_settings() -> Result<String, String> {
     let home = paths::home_dir()?;
-    let config_path = home
-        .join(".config")
-        .join("simurgh-forge")
-        .join("settings.json");
+    let config_path = home.join(".config").join("simurgh-forge").join("settings.json");
     match std::fs::read_to_string(&config_path) {
         Ok(s) => Ok(s),
         Err(_) => Ok("{}".to_string()),
