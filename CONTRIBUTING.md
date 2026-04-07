@@ -1,34 +1,35 @@
 # Contributing to Simurgh Forge
 
-Thank you for your interest in contributing. This guide covers how to report bugs, suggest features, and submit code changes.
+Thank you for helping improve Simurgh Forge. This document describes how we work, how to set up a dev environment, and what we expect in pull requests.
 
-## Reporting Bugs
+## Code of conduct
 
-Open a [GitHub Issue](https://github.com/Raoof128/SimurghForge/issues) with:
+All contributors must follow the [Code of Conduct](CODE_OF_CONDUCT.md). Reports may be routed through maintainers or the contact described in [SECURITY.md](SECURITY.md) for sensitive matters.
 
-- Operating system and version (e.g., macOS 15.2, Apple M3)
+## Reporting bugs
+
+Open a [GitHub issue](https://github.com/Raoof128/SimurghForge/issues) using the bug template when possible. Include:
+
+- OS and version (e.g. macOS 15.x, Apple Silicon)
+- App version or commit SHA
 - Steps to reproduce
-- Expected vs actual behavior
-- Input file format and size (do not attach sensitive files)
-- Error messages from the app or terminal
+- Expected vs actual behaviour
+- Input type and approximate size (do **not** attach confidential files)
+- Relevant error text from the terminal if running `npm run tauri:dev`
 
-## Suggesting Features
+## Suggesting features
 
-Open a GitHub Issue with the `enhancement` label. Describe:
+Open an issue with the **enhancement** label (or use the feature template). Describe the problem, proposed solution, and alternatives you considered.
 
-- The problem you are trying to solve
-- Your proposed solution
-- Alternatives you considered
-
-## Development Setup
+## Development setup
 
 ### Prerequisites
 
 - [Rust](https://rustup.rs/) (1.77+)
 - [Node.js](https://nodejs.org/) (22+)
-- [Homebrew](https://brew.sh/) (macOS)
+- On **macOS**: [Homebrew](https://brew.sh/) for FFmpeg, ImageMagick, Pandoc, LibreOffice, and Python packages for Pandas conversions
 
-### System Dependencies
+### Install system dependencies (macOS)
 
 ```bash
 brew install ffmpeg imagemagick pandoc
@@ -36,88 +37,80 @@ brew install --cask libreoffice
 pip3 install pillow pandas openpyxl pyarrow
 ```
 
-### Clone and Run
+### Clone and run
 
 ```bash
 git clone https://github.com/Raoof128/SimurghForge.git
 cd SimurghForge
 npm install
-npm run tauri dev
+npm run tauri:dev
 ```
 
-### Useful Commands
+### Commands reference
 
-```bash
-npm run lint          # ESLint check
-npm run lint:fix      # ESLint auto-fix
-npm run format        # Prettier format
-npm run format:check  # Prettier check
-npm run type-check    # TypeScript type check
+| Command | Purpose |
+|---------|---------|
+| `npm run check` | **Recommended** before commit: `type-check` + `lint` + `format:check` + `build` |
+| `npm run lint` / `npm run lint:fix` | ESLint (`eslint.config.js`) |
+| `npm run format` / `npm run format:check` | Prettier (`.prettierrc`) |
+| `npm run type-check` | TypeScript `tsc -b --noEmit` |
+| `npm run build` | Vite production build |
+| `npm run test:rust` | `cargo test` in `src-tauri` |
+| `npm run fmt:rust` | `cargo fmt` (see `src-tauri/rustfmt.toml`) |
+| `npm run clippy` | `cargo clippy --all-targets -- -D warnings` |
 
-cd src-tauri
-cargo fmt             # Rust format
-cargo clippy          # Rust lint
-cargo test            # Rust tests
+Editor settings: [.editorconfig](.editorconfig) enforces basic formatting; VS Code users can install recommended extensions from [.vscode/extensions.json](.vscode/extensions.json).
+
+## Code style
+
+### TypeScript / React
+
+- ESLint + Prettier are authoritative; run `npm run check` before pushing.
+- User-visible strings belong in `src/i18n/strings.ts` (no hardcoded copy in components).
+
+### Rust
+
+- `rustfmt`: run `npm run fmt:rust` (or `cd src-tauri && cargo fmt`).
+- `clippy`: run `npm run clippy`; CI treats warnings as errors (`-D warnings`).
+- Prefer explicit error messages returned as `Result<String, String>` for IPC-facing functions.
+
+### Commits
+
+Use [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: add HEIC output via ImageMagick
+fix: reject empty output directory before spawn
+docs: refresh IPC reference for convert_batch
+chore: tighten CI clippy
 ```
 
-## Code Style
+Common types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `style`, `perf`.
 
-**TypeScript/React:**
-- Enforced by ESLint and Prettier (configs in repo root)
-- Run `npm run lint:fix && npm run format` before committing
+## Pull request process
 
-**Rust:**
-- Enforced by `rustfmt` (config in `src-tauri/rustfmt.toml`)
-- Run `cargo fmt` before committing
-- Address `cargo clippy` warnings
+1. Fork and branch from `main` (`feat/…`, `fix/…`, `docs/…`).
+2. Implement changes with **unit tests** for Rust when behaviour is non-trivial.
+3. Run **`npm run check`** and **`npm run test:rust`** (and `npm run clippy` if you touched Rust).
+4. Open a PR against `main`; fill in the PR template.
+5. Keep PRs focused; unrelated refactors belong in separate PRs.
 
-## Commit Messages
+## Adding an engine
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
+1. Add `src-tauri/src/commands/engines/<name>.rs` implementing:
+   `convert(input_path, output_path, app_handle, file_id, options) -> Result<(), String>`.
+2. Export the module in `src-tauri/src/commands/engines/mod.rs`.
+3. Add an `Engine` variant and match arm in `router.rs` and `convert.rs`.
 
-```
-feat: add HEIF image support
-fix: resolve path traversal in output directory
-docs: update README with new format list
-chore: bump Tauri to 2.11
-```
+## Adding a format
 
-Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `style`, `perf`
+1. Update `src/lib/formatMap.ts` (`FORMAT_MAP_DETAILED` and derived maps).
+2. Add or adjust routing in `src-tauri/src/commands/router.rs`.
+3. Extend `src-tauri/src/utils/mime.rs` if detection cannot rely on extension fallback.
+4. Run conversions manually and add or extend Rust tests where logic is non-trivial.
 
-## Pull Request Process
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/my-feature`
-3. Make changes with tests
-4. Run all checks: `npm run lint && npm run type-check && cd src-tauri && cargo test`
-5. Commit with a conventional commit message
-6. Push and open a PR against `main`
-7. Describe what changed and why in the PR body
-
-## Adding a New Engine
-
-1. Create `src-tauri/src/commands/engines/my_engine.rs`
-2. Implement the standard contract:
-   ```rust
-   pub async fn convert(
-       input_path: &Path,
-       output_path: &Path,
-       app_handle: &AppHandle,
-       file_id: &str,
-       options: &ConversionOptions,
-   ) -> Result<(), String>
-   ```
-3. Register in `src-tauri/src/commands/engines/mod.rs`
-4. Add routing in `src-tauri/src/commands/router.rs`
-5. Add formats in `src/lib/formatMap.ts`
-
-## Adding a New Format
-
-1. Add the input-output mapping in `src/lib/formatMap.ts` (`FORMAT_MAP_DETAILED`)
-2. Add MIME detection in `src-tauri/src/utils/mime.rs` (if not extension-based)
-3. Add routing in `src-tauri/src/commands/router.rs`
-4. Test the conversion manually
+Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing, you agree your contributions are licensed under the [MIT License](LICENSE).

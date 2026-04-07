@@ -133,7 +133,13 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
                 />
               </svg>
             ) : (
-              <svg width="40" height="40" viewBox="0 0 40 40" className="text-text-muted/40" aria-hidden>
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 40 40"
+                className="text-text-muted/40"
+                aria-hidden
+              >
                 <path
                   d="M8 28h24M12 28v-4a2 2 0 012-2h12a2 2 0 012 2v4"
                   fill="none"

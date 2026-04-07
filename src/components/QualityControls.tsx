@@ -143,9 +143,7 @@ export function QualityControls({
               <ControlRow
                 label={t("qcMaxWidth")}
                 value={
-                  options.image.maxWidth
-                    ? `${options.image.maxWidth}px`
-                    : t("qcValueOriginal")
+                  options.image.maxWidth ? `${options.image.maxWidth}px` : t("qcValueOriginal")
                 }
               >
                 <input
@@ -222,9 +220,7 @@ export function QualityControls({
               </ControlRow>
               <ControlRow
                 label={t("qcBitrate")}
-                value={
-                  options.video.bitrate ? `${options.video.bitrate} kbps` : t("qcValueAuto")
-                }
+                value={options.video.bitrate ? `${options.video.bitrate} kbps` : t("qcValueAuto")}
               >
                 <input
                   type="range"
@@ -241,7 +237,10 @@ export function QualityControls({
                   aria-label={t("qcBitrate")}
                 />
               </ControlRow>
-              <ControlRow label={t("qcCodec")} value={(options.video.codec ?? "h264").toUpperCase()}>
+              <ControlRow
+                label={t("qcCodec")}
+                value={(options.video.codec ?? "h264").toUpperCase()}
+              >
                 <select
                   value={options.video.codec ?? "h264"}
                   onChange={(e) =>
@@ -257,9 +256,7 @@ export function QualityControls({
               </ControlRow>
               <ControlRow
                 label={t("qcFps")}
-                value={
-                  options.video.fps != null ? String(options.video.fps) : t("qcValueOriginal")
-                }
+                value={options.video.fps != null ? String(options.video.fps) : t("qcValueOriginal")}
               >
                 <select
                   value={options.video.fps ?? ""}
@@ -392,9 +389,11 @@ export function QualityControls({
                 <ControlRow
                   label={t("qcDelimiter")}
                   value={
-                    options.data.delimiter === "\t" ? t("qcDelimiterTab") : options.data.delimiter === "|"
-                      ? t("qcDelimiterPipe")
-                      : t("qcDelimiterComma")
+                    options.data.delimiter === "\t"
+                      ? t("qcDelimiterTab")
+                      : options.data.delimiter === "|"
+                        ? t("qcDelimiterPipe")
+                        : t("qcDelimiterComma")
                   }
                 >
                   <select

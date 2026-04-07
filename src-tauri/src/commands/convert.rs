@@ -141,7 +141,7 @@ pub async fn convert_batch(app: AppHandle, payload: ConvertBatchPayload) -> Resu
         return Err(format!("Too many files in one batch (max {MAX_BATCH_FILES})"));
     }
 
-    let permits = payload.max_concurrency.max(1).min(MAX_CONCURRENCY) as usize;
+    let permits = payload.max_concurrency.clamp(1, MAX_CONCURRENCY) as usize;
     let semaphore = Arc::new(Semaphore::new(permits));
     let total = payload.files.len();
     let succeeded = Arc::new(std::sync::atomic::AtomicUsize::new(0));

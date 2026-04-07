@@ -1,61 +1,65 @@
-# Security Policy
+# Security policy
 
-## Supported Versions
+## Supported versions
 
 | Version | Supported |
 |---------|-----------|
 | 0.2.x   | Yes       |
 | 0.1.x   | No        |
 
-## Reporting a Vulnerability
+## Reporting a vulnerability
 
-**Do not open a public GitHub issue for security vulnerabilities.**
+**Do not open a public GitHub issue for undisclosed security vulnerabilities.**
 
 Email **simurghforge@proton.me** with:
 
-- Description of the vulnerability
+- Description of the issue and affected component (frontend, Rust IPC, specific engine)
 - Steps to reproduce
-- Impact assessment
-- Suggested fix (if any)
+- Impact assessment (confidentiality, integrity, availability)
+- Suggested fix or patch (optional)
 
-### Response Timeline
+For **non-security** bugs or feature requests, use [GitHub Issues](https://github.com/Raoof128/SimurghForge/issues) normally.
 
-- **48 hours** -- acknowledgment of report
-- **7 days** -- initial assessment and severity classification
-- **30 days** -- fix development and release (for confirmed vulnerabilities)
+### Response timeline
 
-## Security Measures
+- **48 hours** — acknowledgment
+- **7 days** — initial assessment and severity
+- **30 days** — target fix and release for confirmed issues (complex cases may take longer; we will communicate)
 
-Simurgh Forge implements the following security controls:
+## Security controls (implementation)
 
-**Input validation:**
-- MIME type detection via file header magic bytes (not extension-only)
-- Path sanitization with traversal rejection (`../` sequences blocked)
-- Canonical path resolution before any file operations
-- File size limits (configurable, default 500 MB)
+**Input and paths**
 
-**Process isolation:**
-- All subprocess calls use `.arg()` chaining -- never string interpolation or shell expansion
-- No user-controlled data is interpolated into command strings
-- Output directory is validated and created before write operations
+- MIME sniffing uses file headers where possible, not only extensions.
+- Path traversal is mitigated by **rejecting `..` path components** (Rust `std::path::Component::ParentDir`), canonicalising inputs, and validating output extensions.
+- Filenames containing consecutive dots (e.g. `photo..edit.png`) are **not** treated as traversal.
+- Per-file size limits enforced in Rust; optional client-provided cap aligned with settings (bounded server-side).
 
-**Application security:**
-- Tauri v2 capability-based permissions model
-- No network access required -- all processing is local
-- Settings stored in user-local config directory
+**Process invocation**
+
+- External tools (FFmpeg, LibreOffice, Pandoc, etc.) are invoked with `Command::arg(...)` / structured arguments — **no** shell string interpolation of user paths.
+
+**Application**
+
+- Tauri v2 capability-based permissions (`src-tauri/capabilities/default.json`).
+- Local-first: no cloud dependency for conversion.
+- Settings stored under the user config directory.
 
 ## Scope
 
-The following are considered in-scope for security reports:
+**In scope**
 
-- Command injection via filenames or paths
-- Path traversal allowing reads/writes outside designated directories
-- MIME type spoofing bypassing safety checks
-- Memory safety issues in Rust backend
-- Privilege escalation via Tauri IPC
+- Path traversal, arbitrary file read/write via IPC or paths
+- Command injection via filenames, options, or environment controlled by the app
+- Memory safety issues in the Rust codebase
+- IPC abuse or capability bypass in Tauri configuration
 
-Out of scope:
+**Out of scope**
 
-- Vulnerabilities in system dependencies (FFmpeg, LibreOffice, Pandoc)
-- Physical access attacks
-- Social engineering
+- Vulnerabilities in upstream third-party binaries (FFmpeg, LibreOffice, Pandoc, ImageMagick, Python packages) — report those to upstream vendors
+- Physical access, malware, or social engineering
+- Denial-of-service via large but legitimate files within documented limits
+
+## Coordinated disclosure
+
+We appreciate responsible disclosure and will credit reporters who wish to be named (unless anonymity is requested).

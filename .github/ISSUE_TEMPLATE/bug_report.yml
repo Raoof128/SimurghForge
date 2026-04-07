@@ -1,0 +1,43 @@
+name: Bug report
+description: Report incorrect behaviour or a crash
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For **security issues**, see [SECURITY.md](https://github.com/Raoof128/SimurghForge/blob/main/SECURITY.md) — do not file details here.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What went wrong in one or two sentences?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. …
+        2. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: App version, or `git rev-parse --short HEAD` if from source
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: e.g. macOS 15.x, Apple Silicon
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / errors
+      description: Terminal output from `npm run tauri:dev` if relevant (redact paths if needed)

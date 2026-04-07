@@ -5,12 +5,7 @@ import { QueuePanel } from "./components/QueuePanel";
 import { Settings } from "./components/Settings";
 import { useConversionQueue } from "./hooks/useConversionQueue";
 import { useIPCEvents } from "./hooks/useIPCEvents";
-import {
-  interpolate,
-  t,
-  tCompletionForged,
-  tNotificationSkipped,
-} from "./i18n/strings";
+import { interpolate, t, tCompletionForged, tNotificationSkipped } from "./i18n/strings";
 import {
   convertBatch,
   getDefaultOutputDir,
@@ -88,10 +83,7 @@ function App() {
 
   const handleBatchComplete = useCallback((event: BatchCompleteEvent) => {
     setForgeTriggered(false);
-    if (
-      event.totalFiles > 0 &&
-      (event.succeeded > 0 || event.failed > 0)
-    ) {
+    if (event.totalFiles > 0 && (event.succeeded > 0 || event.failed > 0)) {
       setCompletionInfo({
         succeeded: event.succeeded,
         failed: event.failed,
@@ -263,7 +255,13 @@ function App() {
         <div className="w-full max-w-2xl mt-4 animate-slide-up" role="status" aria-live="polite">
           <div className="bg-success-dim/30 border border-success/20 rounded-lg px-4 py-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
-              <svg width="16" height="16" viewBox="0 0 16 16" className="text-success flex-shrink-0" aria-hidden>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                className="text-success flex-shrink-0"
+                aria-hidden
+              >
                 <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.2" />
                 <path
                   d="M5 8l2.5 2.5L11 6"

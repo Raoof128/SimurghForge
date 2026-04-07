@@ -22,6 +22,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Summary:** Fixed batch forge failing when `outputDir` was still empty (now defaults server-side to `~/Downloads/SimurghForge`); replaced naive `..` substring checks with real `Path` component detection so names like `photo..edit.png` work; `get_file_info` uses the same rule; added optional `maxInputFileBytes` on the batch payload (from settings) with a server cap aligned to the 2000 MB slider; log conversion task join errors; completion banner only when `totalFiles > 0`; shared `paths::default_output_dir_string()` for default dir.
 - **Verification:** `cargo test` (37 tests), `npm run type-check`.
 
+### Raouf: 2026-04-07 (Australia/Sydney) — documentation & professional tooling
+
+- **Scope:** Repository documentation, CI, developer ergonomics, Clippy hygiene.
+- **Summary:** Added **CODE_OF_CONDUCT.md** (Contributor Covenant 2.1); **docs/** hub with **ARCHITECTURE.md**, **IPC_REFERENCE.md**, **USAGE.md**, and **docs/README.md**; rewrote **README.md** and expanded **CONTRIBUTING.md** and **SECURITY.md** for accuracy (path rules, scope); added **GitHub** PR template and issue forms (bug / feature); **VS Code** extension recommendations; CI split into Ubuntu frontend + Rust jobs and macOS Tauri bundle, **Clippy `-D warnings`** enforced (no `|| true`); root **`npm run check`**, **`test:rust`**, **`fmt:rust`**, **`clippy`** scripts; fixed Clippy **`manual_clamp`** / **`useless_format`** in Rust.
+- **Files:** `CODE_OF_CONDUCT.md`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `docs/*`, `.github/workflows/ci.yml`, `.github/pull_request_template.md`, `.github/ISSUE_TEMPLATE/*`, `.vscode/extensions.json`, `package.json`, `src-tauri/src/commands/convert.rs`, `src-tauri/src/utils/paths.rs`, `AGENT.md`.
+- **Verification:** `npm run check`, `npm run test:rust`, `npm run clippy`.
+
 ## [0.2.0] - 2026-03-28
 
 ### Added

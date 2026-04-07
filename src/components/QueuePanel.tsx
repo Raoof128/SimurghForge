@@ -125,7 +125,13 @@ export function QueuePanel({
               >
                 {isConverting ? (
                   <span className="flex items-center gap-2">
-                    <svg width="12" height="12" viewBox="0 0 12 12" className="animate-spin" aria-hidden>
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      className="animate-spin"
+                      aria-hidden
+                    >
                       <circle
                         cx="6"
                         cy="6"

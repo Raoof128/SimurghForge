@@ -197,7 +197,13 @@ export function FileCard({
 
         {isDone && (
           <div className="mt-2.5 flex items-center gap-2">
-            <svg width="14" height="14" viewBox="0 0 14 14" className="text-success flex-shrink-0" aria-hidden>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              className="text-success flex-shrink-0"
+              aria-hidden
+            >
               <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" strokeWidth="1.2" />
               <path
                 d="M4.5 7l2 2 3.5-3.5"
@@ -249,7 +255,13 @@ export function FileCard({
 
         {isError && (
           <div className="mt-2.5 flex items-center gap-2">
-            <svg width="14" height="14" viewBox="0 0 14 14" className="text-error flex-shrink-0" aria-hidden>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              className="text-error flex-shrink-0"
+              aria-hidden
+            >
               <circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" strokeWidth="1.2" />
               <path
                 d="M5 5l4 4M9 5l-4 4"

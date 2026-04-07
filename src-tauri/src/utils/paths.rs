@@ -60,8 +60,7 @@ mod tests {
             // CI or sandbox without home
             return;
         };
-        let s = format!("~/");
-        let expanded = expand_tilde(&s).expect("expand");
+        let expanded = expand_tilde("~/").expect("expand");
         assert!(Path::new(&expanded).starts_with(&home));
     }
 }

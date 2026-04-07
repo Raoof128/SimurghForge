@@ -40,7 +40,10 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
 
       <div className="animate-slide-in-right relative w-80 bg-bg-surface/95 backdrop-blur-xl border-l border-accent-dim/20 h-full overflow-y-auto">
         <div className="sticky top-0 bg-bg-surface/95 backdrop-blur-xl z-10">
-          <div className="h-[1px] bg-gradient-to-r from-transparent via-accent/30 to-transparent" aria-hidden />
+          <div
+            className="h-[1px] bg-gradient-to-r from-transparent via-accent/30 to-transparent"
+            aria-hidden
+          />
           <div className="flex items-center justify-between px-6 py-5">
             <h2 className="font-display text-[13px] text-accent tracking-[0.2em] uppercase">
               {t("settingsTitle")}
@@ -122,7 +125,10 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
               >
                 {t("settingsMaxFileSize")}
               </label>
-              <span className="font-display text-[11px] text-accent tabular-nums" id="settings-max-file-size-readout">
+              <span
+                className="font-display text-[11px] text-accent tabular-nums"
+                id="settings-max-file-size-readout"
+              >
                 {interpolate(t("settingsMaxFileSizeReadout"), {
                   n: Math.round(settings.maxFileSize / (1024 * 1024)),
                 })}
@@ -152,7 +158,10 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
               >
                 {t("settingsConcurrency")}
               </label>
-              <span className="font-display text-[11px] text-accent tabular-nums" id="settings-concurrency-readout">
+              <span
+                className="font-display text-[11px] text-accent tabular-nums"
+                id="settings-concurrency-readout"
+              >
                 {interpolate(t("settingsConcurrencyThreads"), { count: settings.maxConcurrency })}
               </span>
             </div>
@@ -179,7 +188,9 @@ export function Settings({ settings, onSettingsChange, isOpen, onClose }: Settin
             <p className="font-display text-[10px] text-text-muted/30 tracking-wider">
               {interpolate(t("settingsAboutVersion"), { version: packageJson.version })}
             </p>
-            <p className="text-[9px] text-text-muted/20 mt-1 font-body">{t("settingsAboutAuthor")}</p>
+            <p className="text-[9px] text-text-muted/20 mt-1 font-body">
+              {t("settingsAboutAuthor")}
+            </p>
           </div>
         </div>
       </div>

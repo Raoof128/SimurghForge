@@ -6,9 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint-frontend:
-    name: Lint & Type Check (Frontend)
+  frontend:
+    name: Frontend (typecheck, lint, format, build)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,33 +24,30 @@ jobs:
       - run: npm run type-check
       - run: npm run lint
       - run: npm run format:check
+      - run: npm run build
 
-  test-rust:
-    name: Build & Test (Rust)
-    runs-on: macos-latest
+  rust:
+    name: Rust (fmt, clippy, test)
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-      - name: Rust format check
+          components: rustfmt, clippy
+      - name: Format
         working-directory: src-tauri
-        run: cargo fmt --check
+        run: cargo fmt --all -- --check
       - name: Clippy
         working-directory: src-tauri
-        run: cargo clippy -- -D warnings || true
-      - name: Run tests
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Tests
         working-directory: src-tauri
         run: cargo test
 
-  build-app:
-    name: Build App (macOS)
+  build-tauri-macos:
+    name: Tauri bundle (macOS)
     runs-on: macos-latest
-    needs: [lint-frontend, test-rust]
+    needs: [frontend, rust]
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -58,5 +59,6 @@ jobs:
       - run: npm run tauri build
       - uses: actions/upload-artifact@v4
         with:
-          name: simurgh-forge-macos
+          name: simurgh-forge-macos-bundle
           path: src-tauri/target/release/bundle/
+          if-no-files-found: warn

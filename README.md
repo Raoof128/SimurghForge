@@ -1,132 +1,103 @@
 # Simurgh Forge
 
-**Universal file converter for macOS. 49 formats. 9 engines. Zero cloud.**
+**Universal file converter — local-first, batch-oriented, zero cloud.**
 
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Platform](https://img.shields.io/badge/platform-macOS-lightgrey)
-![Rust](https://img.shields.io/badge/rust-1.77%2B-orange)
-![TypeScript](https://img.shields.io/badge/typescript-6.0-blue)
-![Formats](https://img.shields.io/badge/formats-49-green)
+[![CI](https://github.com/Raoof128/SimurghForge/actions/workflows/ci.yml/badge.svg)](https://github.com/Raoof128/SimurghForge/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.77%2B-orange.svg)](https://www.rust-lang.org/)
+[![TypeScript](https://img.shields.io/badge/typescript-6.x-blue.svg)](https://www.typescriptlang.org/)
 
-Simurgh Forge is a local-first macOS desktop application that converts any file to any compatible format in batch with real-time per-file progress. Built with Tauri v2 (Rust backend) and React (TypeScript frontend). No network required. No subscription. Ships as a single `.app` bundle.
+Simurgh Forge is a **Tauri v2** desktop app with a **React 19** + **TypeScript** UI and a **Rust** backend. It converts files between compatible formats with per-file progress, quality controls, and configurable concurrency. Processing stays on your machine: no account, no upload pipeline.
+
+**Primary target:** macOS (`.app` bundle). The Rust backend uses portable paths and cross-platform conventions where practical for future builds.
+
+---
+
+## Table of contents
+
+- [Features](#features)
+- [Documentation](#documentation)
+- [Tech stack](#tech-stack)
+- [Repository layout](#repository-layout)
+- [Getting started](#getting-started)
+- [Scripts](#scripts)
+- [Testing & quality](#testing--quality)
+- [Contributing & community](#contributing--community)
+- [Security](#security)
+- [License](#license)
 
 ---
 
 ## Features
 
-- **49 supported formats** across images, documents, audio, video, and structured data
-- **9 conversion engines** -- 4 native Rust + 5 CLI-based, with automatic tiered routing
-- **Quality controls** -- Simple presets (Low/Medium/High/Lossless) with an Advanced panel exposing per-format settings
-- **Batch conversion** -- Drop up to 50 files, convert concurrently with configurable thread count (1-8)
-- **Real-time progress** -- Per-file progress bars with FFmpeg providing true percentage tracking
-- **Drag-and-drop + Browse** -- Native file drop via Tauri API, plus a file browser dialog
-- **Open converted files** -- Click to open output files directly in the system default application
-- **Dark forge aesthetic** -- Amber/gold on charcoal with JetBrains Mono typography, molten progress animations, and Persian geometric patterns
-- **Keyboard shortcuts** -- Cmd+O (browse), Cmd+Enter (forge all), Cmd+, (settings), Esc (close)
-- **Settings persistence** -- Output directory, max file size, and concurrency saved across sessions
+- **49 supported formats** — images, documents, audio, video, structured data (see tables in [docs/USAGE.md](docs/USAGE.md))
+- **9 engines** — 4 native Rust + 5 CLI (FFmpeg, LibreOffice, Pandoc, ImageMagick, Python/Pandas), with automatic routing
+- **Quality controls** — Presets (Low / Medium / High / Lossless) and per-format advanced options
+- **Batch queue** — Up to 50 files, concurrency 1–8, real-time progress (including FFmpeg-based percentage when available)
+- **UX** — Drag-and-drop, browse dialog, dark forge-themed UI, i18n-ready string keys, keyboard shortcuts (Cmd/Ctrl)
+- **Settings** — Output directory, max file size, concurrency; persisted in the OS config directory
 
 ---
 
-## Supported Formats
+## Documentation
 
-### Images
+| Resource | Description |
+|----------|-------------|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design and data flow |
+| [docs/IPC_REFERENCE.md](docs/IPC_REFERENCE.md) | Tauri commands and events |
+| [docs/USAGE.md](docs/USAGE.md) | User and developer usage |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Setup, style, PR process |
+| [SECURITY.md](SECURITY.md) | Vulnerability reporting |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Community standards |
+| [CHANGELOG.md](CHANGELOG.md) | Release notes |
 
-| Input | Output | Engine |
-|-------|--------|--------|
-| PNG, JPG, WebP, AVIF, TIFF, BMP, ICO, GIF | Any of these | Rust `image` crate |
-| HEIC, CR2, NEF, SVG | JPG, PNG, WebP, TIFF | ImageMagick |
-
-### Documents
-
-| Input | Output | Engine |
-|-------|--------|--------|
-| DOCX, ODT, RTF, PPTX | PDF, TXT, HTML | LibreOffice Headless |
-| MD, HTML, TXT, LaTeX | PDF, HTML, DOCX, ePub | Pandoc (+ LibreOffice for PDF) |
-| PDF | TXT | Rust `lopdf` |
-| PDF | DOCX, HTML | LibreOffice Headless |
-
-### Audio and Video
-
-| Input | Output | Engine |
-|-------|--------|--------|
-| MP4, MOV, WebM, MKV, AVI | MP4, WebM, MKV, MOV, AVI, GIF | FFmpeg |
-| MP4, MOV, WebM, MKV, AVI | MP3, WAV (audio extract) | FFmpeg |
-| MP3, WAV, FLAC, OGG, AAC, OPUS, M4A | WAV | Rust `symphonia` + `hound` |
-| MP3, WAV, FLAC, OGG, AAC, OPUS, M4A | MP3, FLAC, OGG, AAC, OPUS | FFmpeg |
-
-### Data
-
-| Input | Output | Engine |
-|-------|--------|--------|
-| JSON, YAML, TOML, XML | Any of these, plus CSV/TSV | Rust `serde` ecosystem |
-| CSV, TSV | JSON, YAML, TOML, XML | Rust `serde` + `csv` |
-| CSV, JSON, XLSX, Parquet, TSV, SQLite | Any of these | Python Pandas |
+Design history notes live under [docs/plans/](docs/plans/).
 
 ---
 
-## Tech Stack
+## Tech stack
 
 | Layer | Technology |
-|-------|-----------|
-| App Shell | Tauri v2 (Rust) |
-| Frontend | React 18 + TypeScript + Vite |
-| Styling | Tailwind CSS v4 |
-| Image Processing | Rust `image` + `ravif` crate |
-| Audio Processing | Rust `symphonia` + `hound` |
-| PDF Processing | Rust `lopdf` |
-| Data Processing | Rust `serde_yaml` + `toml` + `quick-xml` + `csv` |
-| Video/Audio Encoding | FFmpeg (CLI) |
-| Document Conversion | LibreOffice Headless + Pandoc (CLI) |
-| Tabular Data | Python Pandas (CLI) |
+|-------|------------|
+| Shell | Tauri 2 |
+| UI | React 19, Vite 8, Tailwind CSS 4 |
+| Desktop IPC | Tauri invoke + events |
+| Backend | Rust 2021, Tokio |
+| Tooling | ESLint, Prettier, rustfmt, Clippy |
 
 ---
 
-## Architecture
-
-Simurgh Forge uses a three-tier engine architecture:
-
-1. **Native Rust** (fastest, zero external deps) -- image conversion, audio decoding to WAV, PDF text extraction, JSON/YAML/TOML/XML/CSV data transforms
-2. **CLI Tools** (feature-rich) -- FFmpeg for video and audio encoding, LibreOffice for Office documents, Pandoc for markup and ePub
-3. **Python** (tabular data) -- Pandas for XLSX, Parquet, and SQLite
-
-The router automatically selects the best engine for each conversion. Native Rust is preferred; CLI tools are used when Rust crates cannot handle the format.
+## Repository layout
 
 ```
-Frontend (React)
-    |
-    | Tauri IPC (invoke + emit)
-    v
-Rust Backend (lib.rs)
-    |
-    +-- router.rs (MIME type -> engine selection)
-    +-- convert.rs (batch orchestrator, Tokio semaphore)
-    +-- engines/
-    |     +-- rust_image.rs    (image crate)
-    |     +-- rust_audio.rs    (symphonia + hound)
-    |     +-- rust_data.rs     (serde ecosystem)
-    |     +-- rust_pdf.rs      (lopdf)
-    |     +-- ffmpeg.rs        (FFmpeg CLI)
-    |     +-- libreoffice.rs   (soffice CLI)
-    |     +-- pandoc.rs        (pandoc CLI)
-    |     +-- pandas.rs        (python3 CLI)
-    |     +-- imagemagick.rs   (magick CLI)
-    +-- utils/
-          +-- mime.rs          (magic byte detection)
-          +-- sanitise.rs      (path validation)
+├── src/                 # React / TypeScript frontend
+│   ├── i18n/            # UI strings (default locale)
+│   ├── components/
+│   ├── hooks/
+│   ├── lib/             # IPC client, format map
+│   └── types/
+├── src-tauri/           # Rust workspace (Tauri backend)
+│   ├── src/commands/    # convert, router, engines
+│   ├── capabilities/    # Tauri v2 permissions
+│   └── ...
+├── docs/                # Architecture, IPC, usage
+├── scripts/             # Helper scripts (e.g. Pandas)
+├── .github/workflows/   # CI
+└── AGENT.md             # Maintainer automation notes
 ```
 
 ---
 
-## Getting Started
+## Getting started
 
 ### Prerequisites
 
-- macOS 12+
-- [Rust](https://rustup.rs/) 1.77+
-- [Node.js](https://nodejs.org/) 22+
-- [Homebrew](https://brew.sh/)
+- **macOS** 12+ (supported for development and release builds)
+- [Rust](https://rustup.rs/) **1.77+**
+- [Node.js](https://nodejs.org/) **22+**
+- [Homebrew](https://brew.sh/) (for native CLIs)
 
-### Install System Dependencies
+### System dependencies
 
 ```bash
 brew install ffmpeg imagemagick pandoc
@@ -134,61 +105,73 @@ brew install --cask libreoffice
 pip3 install pillow pandas openpyxl pyarrow
 ```
 
-### Clone and Run
+### Clone and run (development)
 
 ```bash
 git clone https://github.com/Raoof128/SimurghForge.git
 cd SimurghForge
 npm install
-npm run tauri dev
+npm run tauri:dev
 ```
 
-### Build for Production
+### Production build (macOS)
 
 ```bash
-npm run tauri build
+npm run tauri:build
 ```
 
-The `.app` bundle is output to `src-tauri/target/release/bundle/macos/`.
+Artifacts appear under `src-tauri/target/release/bundle/macos/`.
 
 ---
 
-## Quality Controls
+## Scripts
 
-Each file in the queue can be configured with quality settings:
-
-**Presets** (one click):
-
-| Preset | Image | Video | Audio |
-|--------|-------|-------|-------|
-| Low | 60%, 1024px max | 720p, 1 Mbps | 128 kbps |
-| Medium | 80%, 2048px max | 1080p, 5 Mbps | 192 kbps |
-| High | 95%, original | Original, 15 Mbps | 320 kbps |
-| Lossless | 100%, original | Original, lossless | 1411 kbps |
-
-**Advanced** (per-format controls): quality %, max dimensions, DPI, strip metadata, resolution, bitrate, codec (H.264/H.265/VP9), FPS, sample rate, channels, compression level, pretty-print, delimiter, encoding.
-
----
-
-## Keyboard Shortcuts
-
-| Shortcut | Action |
-|----------|--------|
-| Cmd+O | Browse files |
-| Cmd+Enter | Forge all queued files |
-| Cmd+, | Open settings |
-| Esc | Close settings |
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Vite dev server only (web UI) |
+| `npm run tauri:dev` | Full Tauri app in dev mode |
+| `npm run build` | Typecheck + Vite production build |
+| `npm run tauri:build` | Production `.app` (macOS) |
+| `npm run check` | Typecheck + ESLint + Prettier check + Vite build |
+| `npm run lint` / `npm run lint:fix` | ESLint |
+| `npm run format` / `npm run format:check` | Prettier |
+| `npm run type-check` | `tsc -b --noEmit` |
+| `npm run test:rust` | `cargo test` in `src-tauri` |
+| `npm run fmt:rust` | `cargo fmt` in `src-tauri` |
+| `npm run clippy` | Clippy with `-D warnings` |
 
 ---
 
-## Contributing
+## Testing & quality
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style, and pull request guidelines.
+- **Frontend:** static analysis via TypeScript, ESLint, Prettier; production build must succeed.
+- **Backend:** `cargo test`, `cargo fmt --check`, `cargo clippy -- -D warnings` (see `npm run` scripts).
+- **E2E:** Not part of this repository (by project policy); manual QA on macOS is recommended before releases.
+
+CI runs on **GitHub Actions** (see [.github/workflows/ci.yml](.github/workflows/ci.yml)): frontend checks, Rust checks on Linux, macOS Tauri bundle build.
+
+---
+
+## Contributing & community
+
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) for branch workflow, conventional commits, and how to add engines/formats.
+- Abide by the [Code of Conduct](CODE_OF_CONDUCT.md).
+- Security-sensitive reports: see [SECURITY.md](SECURITY.md) (do not file public issues for undisclosed vulnerabilities).
+
+---
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for the vulnerability reporting process.
+Path handling uses canonicalisation and **parent-directory component** detection (not naive substring checks). Subprocesses are invoked with structured arguments (no shell interpolation). Details and reporting: [SECURITY.md](SECURITY.md).
+
+---
 
 ## License
 
-[MIT](LICENSE) -- Raouf Abedini, 2026
+[MIT License](LICENSE) — Copyright (c) 2026 Raouf Abedini.
+
+---
+
+## Acknowledgements
+
+Built with [Tauri](https://tauri.app/), [React](https://react.dev/), and the open-source crates and CLI tools listed in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

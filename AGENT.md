@@ -4,6 +4,7 @@
 
 - Tauri 2 + React 19 + TypeScript + Vite + Tailwind CSS v4.
 - Frontend lives under `src/`; Rust backend under `src-tauri/`.
+- Documentation hub: [docs/README.md](docs/README.md) (architecture, IPC reference, usage).
 
 ## Code style
 
@@ -13,8 +14,9 @@
 
 ## Verification
 
-- Run `npm run lint`, `npm run type-check`, and `npm run build` before claiming work is complete.
-- For Rust changes: `cargo test` (and `cargo clippy` when practical) in `src-tauri/`.
+- Run **`npm run check`** before claiming work is complete (typecheck, lint, Prettier, Vite build).
+- For Rust changes: **`npm run test:rust`** and **`npm run clippy`** (`-D warnings`).
+- Prefer **`npm run fmt:rust`** after editing Rust.
 
 ## Logging changes
 
@@ -33,3 +35,7 @@
 ### Raouf: 2026-04-07 — Batch conversion fix
 
 - See **batch conversion & path hardening** in `CHANGELOG.md` **[Unreleased]** (empty `outputDir`, `..` in filenames, `maxInputFileBytes` IPC).
+
+### Raouf: 2026-04-07 — Documentation & professional tooling
+
+- See **documentation & professional tooling** in `CHANGELOG.md` **[Unreleased]** (CODE_OF_CONDUCT, docs/, CI, PR/issue templates, VS Code, npm scripts, Clippy fixes).
