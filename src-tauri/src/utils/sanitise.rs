@@ -1,8 +1,24 @@
-use std::path::{Path, PathBuf};
 use std::fs;
+use std::path::{Component, Path, PathBuf};
+
+use super::paths;
+
+/// Align with frontend default (`500 * 1024 * 1024` in `types/conversion.ts`).
+pub const MAX_INPUT_FILE_BYTES: u64 = 500 * 1024 * 1024;
+
+/// Matches the settings slider maximum (`Settings.tsx`).
+pub const ABSOLUTE_MAX_INPUT_FILE_BYTES: u64 = 2000 * 1024 * 1024;
+
+/// True when the path contains a `..` path component (directory traversal).  
+/// Filenames like `file..name.png` are allowed (no `ParentDir` component).
+pub fn path_has_parent_dir_component(path: &str) -> bool {
+    Path::new(path)
+        .components()
+        .any(|c| matches!(c, Component::ParentDir))
+}
 
 pub fn validate_input(path: &str, max_size: u64) -> Result<PathBuf, String> {
-    if path.contains("..") {
+    if path_has_parent_dir_component(path) {
         return Err("Path traversal detected".into());
     }
 
@@ -26,18 +42,27 @@ pub fn validate_input(path: &str, max_size: u64) -> Result<PathBuf, String> {
     Ok(canonical)
 }
 
+/// Only allow safe file extensions (no path separators or control chars).
+pub fn sanitize_output_format(fmt: &str) -> Result<String, String> {
+    let f = fmt.trim().to_lowercase();
+    if f.is_empty() || f.len() > 16 {
+        return Err("Invalid output format".into());
+    }
+    if !f.chars().all(|c| c.is_ascii_alphanumeric()) {
+        return Err("Invalid output format".into());
+    }
+    Ok(f)
+}
+
 pub fn build_output_path(
     output_dir: &str,
     input_filename: &str,
     output_format: &str,
 ) -> Result<PathBuf, String> {
-    // Resolve ~ to home directory
-    let resolved_dir = if output_dir.starts_with("~/") {
-        let home = std::env::var("HOME").unwrap_or_default();
-        format!("{}{}", home, &output_dir[1..])
-    } else {
-        output_dir.to_string()
-    };
+    let resolved_dir = paths::expand_tilde(output_dir.trim())?;
+    if resolved_dir.trim().is_empty() {
+        return Err("Output directory is empty".into());
+    }
     let dir = Path::new(&resolved_dir);
     fs::create_dir_all(dir).map_err(|e| format!("Cannot create output dir: {}", e))?;
 
@@ -55,7 +80,8 @@ pub fn build_output_path(
         return Err("Filename is empty after sanitization".into());
     }
 
-    let output_file = format!("{}.{}", clean, output_format);
+    let ext = sanitize_output_format(output_format)?;
+    let output_file = format!("{clean}.{ext}");
     Ok(dir.join(&output_file))
 }
 
@@ -65,15 +91,22 @@ mod tests {
     use std::io::Write;
 
     #[test]
+    fn parent_dir_detection_allows_double_dot_in_filename() {
+        assert!(!path_has_parent_dir_component("photo..edited.png"));
+        assert!(path_has_parent_dir_component("../secret.txt"));
+        assert!(path_has_parent_dir_component("/tmp/foo/../../etc/passwd"));
+    }
+
+    #[test]
     fn test_rejects_traversal() {
-        let result = validate_input("../../etc/passwd", 500_000_000);
+        let result = validate_input("../../etc/passwd", MAX_INPUT_FILE_BYTES);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("traversal"));
     }
 
     #[test]
     fn test_rejects_nonexistent() {
-        let result = validate_input("/nonexistent/file.txt", 500_000_000);
+        let result = validate_input("/nonexistent/file.txt", MAX_INPUT_FILE_BYTES);
         assert!(result.is_err());
     }
 
@@ -92,7 +125,7 @@ mod tests {
         let mut f = tempfile::NamedTempFile::new().unwrap();
         f.write_all(b"hello").unwrap();
         f.flush().unwrap();
-        let result = validate_input(f.path().to_str().unwrap(), 500_000_000);
+        let result = validate_input(f.path().to_str().unwrap(), MAX_INPUT_FILE_BYTES);
         assert!(result.is_ok());
     }
 
@@ -103,5 +136,12 @@ mod tests {
         assert!(result.is_ok());
         let path = result.unwrap();
         assert!(path.to_str().unwrap().ends_with("my_file.pdf"));
+    }
+
+    #[test]
+    fn test_rejects_bad_extension() {
+        let dir = tempfile::tempdir().unwrap();
+        let r = build_output_path(dir.path().to_str().unwrap(), "a.txt", "../x");
+        assert!(r.is_err());
     }
 }

@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { getGroupedFormats } from "../lib/formatMap";
+import { interpolate, t } from "../i18n/strings";
 
 interface FormatSelectorProps {
   filename: string;
@@ -15,8 +16,8 @@ export function FormatSelector({
   onFormatChange,
   disabled = false,
 }: FormatSelectorProps) {
-  const groups = getGroupedFormats(filename);
-  const allFormats = groups.flatMap((g) => g.formats);
+  const groups = useMemo(() => getGroupedFormats(filename), [filename]);
+  const allFormats = useMemo(() => groups.flatMap((g) => g.formats), [groups]);
   const [isOpen, setIsOpen] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -28,7 +29,6 @@ export function FormatSelector({
   const updatePosition = useCallback(() => {
     if (!buttonRef.current) return;
     const rect = buttonRef.current.getBoundingClientRect();
-    // Count visible items to estimate height
     const visibleCount = showMore ? allFormats.length : (groups[0]?.formats.length ?? 0);
     const dropdownHeight = visibleCount * 30 + (hasMore ? 32 : 0) + 8;
     const spaceBelow = window.innerHeight - rect.bottom;
@@ -59,10 +59,21 @@ export function FormatSelector({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Reposition when showMore changes
   useEffect(() => {
     if (isOpen) updatePosition();
   }, [isOpen, showMore, updatePosition]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+        setShowMore(false);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen]);
 
   const handleToggle = () => {
     if (disabled) return;
@@ -79,12 +90,12 @@ export function FormatSelector({
     setShowMore(false);
   };
 
-  // Check if selected format is in the "more" group
   const selectedInMore = groups.length > 1 && groups[1].formats.includes(selectedFormat);
 
   return (
     <>
       <button
+        type="button"
         ref={buttonRef}
         onClick={handleToggle}
         disabled={disabled}
@@ -96,7 +107,9 @@ export function FormatSelector({
                    ${isOpen ? "border-accent ring-1 ring-accent/30" : "hover:border-accent/60 hover:bg-bg-hover"}`}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        aria-label={`Output format: ${selectedFormat.toUpperCase()}`}
+        aria-label={interpolate(t("formatOutputFormatLabel"), {
+          format: selectedFormat.toUpperCase(),
+        })}
       >
         <span>.{selectedFormat.toUpperCase()}</span>
         <svg
@@ -104,6 +117,7 @@ export function FormatSelector({
           height="6"
           viewBox="0 0 10 6"
           className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+          aria-hidden
         >
           <path
             d="M1 1L5 5L9 1"
@@ -127,11 +141,11 @@ export function FormatSelector({
               zIndex: 9999,
             }}
             role="listbox"
-            aria-label="Output formats"
+            aria-label={t("formatOutputFormats")}
           >
-            {/* Common formats */}
             {groups[0]?.formats.map((fmt) => (
               <button
+                type="button"
                 key={fmt}
                 role="option"
                 aria-selected={fmt === selectedFormat}
@@ -149,11 +163,11 @@ export function FormatSelector({
               </button>
             ))}
 
-            {/* "More" toggle + extra formats */}
             {hasMore && (
               <>
                 {!showMore && !selectedInMore ? (
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowMore(true);
@@ -162,13 +176,14 @@ export function FormatSelector({
                              text-text-muted/50 hover:text-text-muted hover:bg-bg-hover
                              transition-colors duration-100 border-t border-text-muted/8"
                   >
-                    + {groups[1].formats.length} more
+                    {interpolate(t("formatMore"), { count: groups[1].formats.length })}
                   </button>
                 ) : (
                   <>
-                    <div className="border-t border-text-muted/8 mx-2 my-0.5" />
+                    <div className="border-t border-text-muted/8 mx-2 my-0.5" aria-hidden />
                     {groups[1].formats.map((fmt) => (
                       <button
+                        type="button"
                         key={fmt}
                         role="option"
                         aria-selected={fmt === selectedFormat}

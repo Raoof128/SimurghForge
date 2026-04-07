@@ -15,27 +15,39 @@ interface UseIPCEventsProps {
 
 export function useIPCEvents({ onProgress, onBatchComplete }: UseIPCEventsProps) {
   useEffect(() => {
+    let cancelled = false;
     let unlisten: (() => void) | undefined;
     listen<ProgressEvent>("conversion_progress", (event) => {
       const { id, status, percent, errorMsg, outputPath } = event.payload;
       onProgress(id, status, percent, errorMsg, outputPath);
     }).then((fn) => {
-      unlisten = fn;
+      if (cancelled) {
+        fn();
+      } else {
+        unlisten = fn;
+      }
     });
     return () => {
+      cancelled = true;
       unlisten?.();
     };
   }, [onProgress]);
 
   useEffect(() => {
     if (!onBatchComplete) return;
+    let cancelled = false;
     let unlisten: (() => void) | undefined;
     listen<BatchCompleteEvent>("batch_complete", (event) => {
       onBatchComplete(event.payload);
     }).then((fn) => {
-      unlisten = fn;
+      if (cancelled) {
+        fn();
+      } else {
+        unlisten = fn;
+      }
     });
     return () => {
+      cancelled = true;
       unlisten?.();
     };
   }, [onBatchComplete]);

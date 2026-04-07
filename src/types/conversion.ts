@@ -118,6 +118,8 @@ export interface ConvertBatchPayload {
   }[];
   outputDir: string;
   maxConcurrency: number;
+  /** Synced from settings; backend clamps to the absolute max file size slider. */
+  maxInputFileBytes?: number;
 }
 
 export interface AppSettings {

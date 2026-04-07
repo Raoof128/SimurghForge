@@ -5,7 +5,7 @@ use tokio::sync::Semaphore;
 
 use super::router::{self, Engine};
 use super::engines;
-use crate::utils::{mime, sanitise};
+use crate::utils::{mime, paths, sanitise};
 
 #[allow(dead_code)]
 #[derive(Deserialize, Clone, Debug, Default)]
@@ -77,8 +77,12 @@ pub struct FileRequest {
 #[serde(rename_all = "camelCase")]
 pub struct ConvertBatchPayload {
     pub files: Vec<FileRequest>,
+    /// If empty, the backend uses the same default as `get_default_output_dir` (fixes forge before settings load).
     pub output_dir: String,
     pub max_concurrency: u32,
+    /// From app settings; capped server-side to match the max file size slider.
+    #[serde(default)]
+    pub max_input_file_bytes: Option<u64>,
 }
 
 #[derive(Clone, Serialize)]
@@ -110,13 +114,40 @@ pub fn emit_progress(app: &AppHandle, id: &str, status: &str, percent: u8, error
     });
 }
 
+/// Matches frontend queue limit (`useConversionQueue`).
+const MAX_BATCH_FILES: usize = 50;
+/// Matches settings slider max (`Settings.tsx`).
+const MAX_CONCURRENCY: u32 = 8;
+
+fn clamp_max_input_bytes(raw: Option<u64>) -> u64 {
+    match raw {
+        Some(v) if v > 0 => v.min(sanitise::ABSOLUTE_MAX_INPUT_FILE_BYTES),
+        _ => sanitise::MAX_INPUT_FILE_BYTES,
+    }
+}
+
+fn resolve_output_dir(raw: &str) -> Result<String, String> {
+    let t = raw.trim();
+    if t.is_empty() {
+        paths::default_output_dir_string()
+    } else {
+        Ok(t.to_string())
+    }
+}
+
 #[tauri::command]
 pub async fn convert_batch(app: AppHandle, payload: ConvertBatchPayload) -> Result<(), String> {
-    let semaphore = Arc::new(Semaphore::new(payload.max_concurrency as usize));
+    if payload.files.len() > MAX_BATCH_FILES {
+        return Err(format!("Too many files in one batch (max {MAX_BATCH_FILES})"));
+    }
+
+    let permits = payload.max_concurrency.max(1).min(MAX_CONCURRENCY) as usize;
+    let semaphore = Arc::new(Semaphore::new(permits));
     let total = payload.files.len();
     let succeeded = Arc::new(std::sync::atomic::AtomicUsize::new(0));
     let failed = Arc::new(std::sync::atomic::AtomicUsize::new(0));
-    let output_dir = payload.output_dir.clone();
+    let max_input_bytes = clamp_max_input_bytes(payload.max_input_file_bytes);
+    let output_dir = resolve_output_dir(&payload.output_dir)?;
 
     let mut handles = Vec::new();
 
@@ -126,11 +157,15 @@ pub async fn convert_batch(app: AppHandle, payload: ConvertBatchPayload) -> Resu
         let ok_count = Arc::clone(&succeeded);
         let err_count = Arc::clone(&failed);
         let out_dir = output_dir.clone();
+        let max_bytes = max_input_bytes;
 
         let handle = tauri::async_runtime::spawn(async move {
-            let _permit = Arc::clone(&sem).acquire_owned().await.unwrap();
+            let _permit = Arc::clone(&sem)
+                .acquire_owned()
+                .await
+                .expect("conversion semaphore should not be closed");
 
-            let input_path = match sanitise::validate_input(&file.input_path, 500_000_000) {
+            let input_path = match sanitise::validate_input(&file.input_path, max_bytes) {
                 Ok(p) => p,
                 Err(e) => {
                     emit_progress(&app, &file.id, "error", 0, Some(e), None);
@@ -201,7 +236,9 @@ pub async fn convert_batch(app: AppHandle, payload: ConvertBatchPayload) -> Resu
     }
 
     for handle in handles {
-        let _ = handle.await;
+        if let Err(e) = handle.await {
+            log::error!("conversion task join error: {e}");
+        }
     }
 
     let ok = succeeded.load(std::sync::atomic::Ordering::Relaxed);
@@ -218,6 +255,5 @@ pub async fn convert_batch(app: AppHandle, payload: ConvertBatchPayload) -> Resu
 
 #[tauri::command]
 pub async fn get_default_output_dir() -> Result<String, String> {
-    let home = std::env::var("HOME").map_err(|e| e.to_string())?;
-    Ok(format!("{}/Downloads/SimurghForge", home))
+    paths::default_output_dir_string()
 }

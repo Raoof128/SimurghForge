@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
+import { t } from "../i18n/strings";
 
 interface DropZoneProps {
   onFilesDropped: (paths: string[]) => void;
@@ -11,6 +12,7 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     let unlisten: (() => void) | undefined;
 
     getCurrentWebview()
@@ -25,10 +27,15 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
         }
       })
       .then((fn) => {
-        unlisten = fn;
+        if (cancelled) {
+          fn();
+        } else {
+          unlisten = fn;
+        }
       });
 
     return () => {
+      cancelled = true;
       unlisten?.();
     };
   }, [onFilesDropped]);
@@ -49,6 +56,7 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
               height="20"
               viewBox="0 0 40 40"
               className={`${isDragging ? "text-accent" : "text-text-muted/40"}`}
+              aria-hidden
             >
               <path
                 d="M8 28h24M12 28v-4a2 2 0 012-2h12a2 2 0 012 2v4"
@@ -61,21 +69,22 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
             <span
               className={`font-display text-[12px] ${isDragging ? "text-accent" : "text-text-muted/50"}`}
             >
-              {isDragging ? "Release to add more" : "Drop more files here"}
+              {isDragging ? t("dropReleaseAdd") : t("dropMoreCollapsed")}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 bg-accent/10 text-accent text-[10px] font-display font-medium tracking-wider uppercase rounded-full px-2.5 py-0.5 border border-accent/15">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+              <span className="w-1.5 h-1.5 rounded-full bg-accent" aria-hidden />
               {fileCount}
             </span>
             <button
+              type="button"
               onClick={onBrowse}
               className="text-[10px] font-display text-text-muted/50 tracking-wider uppercase
                          hover:text-accent transition-all duration-200 px-2 py-1
                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
-              Browse
+              {t("browse")}
             </button>
           </div>
         </div>
@@ -89,14 +98,13 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
         isDragging ? "animate-forge-glow" : ""
       }`}
     >
-      {/* Outer border glow layer */}
       <div
         className={`absolute inset-0 rounded-xl transition-all duration-500 ${
           isDragging ? "bg-gradient-to-b from-accent/8 via-transparent to-ember/5" : ""
         }`}
+        aria-hidden
       />
 
-      {/* Main drop area */}
       <div
         className={`relative border-2 border-dashed rounded-xl py-10 px-8 text-center transition-all duration-500 ${
           isDragging
@@ -104,12 +112,10 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
             : "border-text-muted/12 hover:border-accent-dim/30"
         }`}
       >
-        {/* Forge icon */}
         <div className="flex flex-col items-center gap-3">
           <div className={`transition-all duration-500 ${isDragging ? "scale-110" : ""}`}>
             {isDragging ? (
-              /* Active: flame icon */
-              <svg width="40" height="40" viewBox="0 0 40 40" className="text-accent">
+              <svg width="40" height="40" viewBox="0 0 40 40" className="text-accent" aria-hidden>
                 <path
                   d="M20 4c0 0-8 10-8 20a8 8 0 0016 0C28 14 20 4 20 4z"
                   fill="none"
@@ -127,8 +133,7 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
                 />
               </svg>
             ) : (
-              /* Idle: anvil/forge icon */
-              <svg width="40" height="40" viewBox="0 0 40 40" className="text-text-muted/40">
+              <svg width="40" height="40" viewBox="0 0 40 40" className="text-text-muted/40" aria-hidden>
                 <path
                   d="M8 28h24M12 28v-4a2 2 0 012-2h12a2 2 0 012 2v4"
                   fill="none"
@@ -161,14 +166,13 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
                 isDragging ? "text-accent" : "text-text-muted/60"
               }`}
             >
-              {isDragging ? "Release to forge" : "Drop files here to begin"}
+              {isDragging ? t("dropReleaseForge") : t("dropTitle")}
             </p>
-            <p className="text-[10px] text-text-muted/30 mt-1 font-body">
-              Images, documents, audio, video, data
-            </p>
+            <p className="text-[10px] text-text-muted/30 mt-1 font-body">{t("dropHint")}</p>
           </div>
 
           <button
+            type="button"
             onClick={onBrowse}
             className="mt-3 text-[11px] font-display text-accent/70 tracking-wider uppercase
                        border border-accent-dim/30 rounded-md px-4 py-1.5
@@ -176,7 +180,7 @@ export function DropZone({ onFilesDropped, fileCount, onBrowse }: DropZoneProps)
                        transition-all duration-200
                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
-            Browse Files
+            {t("browseFiles")}
           </button>
         </div>
       </div>

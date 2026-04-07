@@ -1,3 +1,5 @@
+import { interpolate, t } from "../i18n/strings";
+
 interface ProgressBarProps {
   percent: number;
   isActive: boolean;
@@ -13,26 +15,24 @@ export function ProgressBar({ percent, isActive }: ProgressBarProps) {
       aria-valuenow={clampedPercent}
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-label={`Conversion progress: ${clampedPercent}%`}
+      aria-label={interpolate(t("progressConversion"), { percent: clampedPercent })}
     >
-      {/* Track glow (subtle ambient light from the bar) */}
       {isActive && (
         <div
           className="absolute inset-0 rounded-full opacity-30 blur-sm"
           style={{
             background: `linear-gradient(90deg, transparent, var(--color-accent-glow) ${clampedPercent}%, transparent ${clampedPercent}%)`,
           }}
+          aria-hidden
         />
       )}
 
-      {/* Fill bar — molten metal effect */}
       <div
         className={`relative h-full rounded-full transition-[width] duration-500 ease-out ${
           isActive ? "molten-bar animate-progress-glow" : "bg-accent"
         }`}
         style={{ width: `${clampedPercent}%` }}
       >
-        {/* Leading edge spark */}
         {isActive && clampedPercent > 5 && clampedPercent < 100 && (
           <div
             className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
@@ -40,6 +40,7 @@ export function ProgressBar({ percent, isActive }: ProgressBarProps) {
               background: "var(--color-accent-bright)",
               boxShadow: "0 0 8px var(--color-accent-bright), 0 0 16px var(--color-accent)",
             }}
+            aria-hidden
           />
         )}
       </div>

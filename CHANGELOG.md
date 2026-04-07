@@ -5,6 +5,23 @@ All notable changes to Simurgh Forge are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Raouf: 2026-04-07 (Australia/Sydney)
+
+- **Scope:** Frontend (`src/`), HTML shell, i18n, build tooling; **Rust** (`src-tauri/`).
+- **Summary (frontend):** Centralised all UI copy in `src/i18n/strings.ts` for i18n readiness; fixed async Tauri event unlisten race on unmount; corrected retry batch payload by snapshotting the file before reset; added Ctrl+Windows/Linux parity for keyboard shortcuts; improved accessibility (roles, labels, focus, settings backdrop as a real button, toast/queue live regions); aligned settings “About” version with `package.json`; added `esbuild` dev dependency so `vite build` minification works; tightened `main.tsx` root bootstrap and `index.html` meta/theme; enabled `resolveJsonModule` for JSON version import.
+- **Summary (Rust):** Added `utils/paths.rs` for portable home resolution and `~/` expansion (Windows `USERPROFILE` / `HOMEDRIVE`+`HOMEPATH`, Unix `HOME`); replaced macOS-only `/usr/bin/open` with the `open` crate for `open_folder`; rejected `..` in `get_file_info` paths; capped batch size (50) and concurrency (1–8) to match the UI and avoid `Semaphore(0)` deadlocks; aligned max input size with the frontend (`500 * 1024 * 1024`); sanitized output extensions in `build_output_path`; clearer semaphore acquire error; default downloads folder via `Path` joins.
+- **Files:** `AGENT.md`, `CHANGELOG.md`, `index.html`, `package.json`, `package-lock.json`, `tsconfig.app.json`, `src/main.tsx`, `src/App.tsx`, `src/i18n/strings.ts`, `src/components/*`, `src/hooks/useIPCEvents.ts`, `src-tauri/Cargo.toml`, `src-tauri/src/lib.rs`, `src-tauri/src/commands/convert.rs`, `src-tauri/src/utils/mod.rs`, `src-tauri/src/utils/paths.rs`, `src-tauri/src/utils/sanitise.rs`.
+- **Verification:** `npm run type-check`, `npm run lint`, `npm run build` (pass); `cargo test` in `src-tauri` (36 tests, pass).
+- **Follow-ups:** Consider extracting additional locales from `strings.ts`; optional `React.memo` on queue rows if profiling shows benefit.
+
+### Raouf: 2026-04-07 (Australia/Sydney) — batch conversion & path hardening
+
+- **Scope:** `src-tauri/` (`lib.rs`, `commands/convert.rs`, `utils/sanitise.rs`, `utils/paths.rs`), `src/App.tsx`, `src/types/conversion.ts`.
+- **Summary:** Fixed batch forge failing when `outputDir` was still empty (now defaults server-side to `~/Downloads/SimurghForge`); replaced naive `..` substring checks with real `Path` component detection so names like `photo..edit.png` work; `get_file_info` uses the same rule; added optional `maxInputFileBytes` on the batch payload (from settings) with a server cap aligned to the 2000 MB slider; log conversion task join errors; completion banner only when `totalFiles > 0`; shared `paths::default_output_dir_string()` for default dir.
+- **Verification:** `cargo test` (37 tests), `npm run type-check`.
+
 ## [0.2.0] - 2026-03-28
 
 ### Added
