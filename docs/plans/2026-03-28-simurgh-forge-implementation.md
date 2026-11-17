@@ -59,7 +59,7 @@ Expected: All version strings print, no errors.
 **Step 1: Initialize Vite + React + TypeScript**
 
 ```bash
-cd /Users/raoof.r12/Desktop/Raouf/new_Project/simurgh-forge
+cd <repo>
 npm create vite@latest . -- --template react-ts
 ```
 
