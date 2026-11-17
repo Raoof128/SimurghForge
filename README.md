@@ -32,7 +32,7 @@ Simurgh Forge is a **Tauri v2** desktop app with a **React 19** + **TypeScript**
 
 ## Features
 
-- **43 file extensions** — images, documents, audio, video, structured data. [`src/lib/formatMap.ts`](src/lib/formatMap.ts) is the authoritative list (see also the tables in [docs/USAGE.md](docs/USAGE.md))
+- **44 input formats** — images, documents, audio, video, structured data (45 file extensions in all, counting GIF, which is output only). [`src/lib/formatMap.ts`](src/lib/formatMap.ts) is the authoritative list (see also the tables in [docs/USAGE.md](docs/USAGE.md))
 - **9 engines** — 4 native Rust + 5 CLI (FFmpeg, LibreOffice, Pandoc, ImageMagick, Python/Pandas), with automatic routing
 - **Quality controls** — Presets (Low / Medium / High / Lossless) and per-format advanced options
 - **Batch queue** — Up to 50 files, concurrency 1–8, real-time progress (including FFmpeg-based percentage when available)
