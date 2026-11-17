@@ -25,6 +25,10 @@
 
 ---
 
+### Raouf: 2026-11-17 — CI system libraries; README format count
+
+- See `CHANGELOG.md` under **[Unreleased]** for the entry (Tauri's Linux system libraries and `nasm` installed in the Rust CI job, which had failed on `main` since April; README corrected from 49 to 44 input formats, counted from `src/lib/formatMap.ts`; status line added).
+
 ### Raouf: 2026-04-07 — CI (npm + rustfmt)
 
 - See `CHANGELOG.md` under **[Unreleased]** — **CI: npm install + rustfmt** (`.npmrc`, `cargo fmt` across `src-tauri/`).
