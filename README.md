@@ -9,6 +9,8 @@
 
 Simurgh Forge is a **Tauri v2** desktop app with a **React 19** + **TypeScript** UI and a **Rust** backend. It converts files between compatible formats with per-file progress, quality controls, and configurable concurrency. Processing stays on your machine: no account, no upload pipeline.
 
+**Status:** a personal project from April 2026. No signed release is published; build it from source. Conversions that use FFmpeg, LibreOffice, Pandoc, ImageMagick or Python need those tools installed.
+
 **Primary target:** macOS (`.app` bundle). The Rust backend uses portable paths and cross-platform conventions where practical for future builds.
 
 ---
@@ -30,7 +32,7 @@ Simurgh Forge is a **Tauri v2** desktop app with a **React 19** + **TypeScript**
 
 ## Features
 
-- **49 supported formats** — images, documents, audio, video, structured data (see tables in [docs/USAGE.md](docs/USAGE.md))
+- **43 file extensions** — images, documents, audio, video, structured data. [`src/lib/formatMap.ts`](src/lib/formatMap.ts) is the authoritative list (see also the tables in [docs/USAGE.md](docs/USAGE.md))
 - **9 engines** — 4 native Rust + 5 CLI (FFmpeg, LibreOffice, Pandoc, ImageMagick, Python/Pandas), with automatic routing
 - **Quality controls** — Presets (Low / Medium / High / Lossless) and per-format advanced options
 - **Batch queue** — Up to 50 files, concurrency 1–8, real-time progress (including FFmpeg-based percentage when available)

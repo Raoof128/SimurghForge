@@ -7,6 +7,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Raouf: 2026-11-17 (Australia/Sydney) — CI: Linux system libraries; README format count
+
+- **Scope:** `.github/workflows/ci.yml`, `README.md`.
+- **Summary:** The Rust CI job has failed on `main` since April. It ran on Ubuntu without the system libraries Tauri needs (WebKitGTK and friends), so the crate could not compile; the job now installs them first. The README said "49 supported formats"; the format map in `src/lib/formatMap.ts` holds 43 extensions, so the README now says 43 and points at that file. Added a status line: a personal project with no published release.
+- **Files:** `.github/workflows/ci.yml`, `README.md`, `CHANGELOG.md`.
+- **Verification:** `cargo fmt --all -- --check` clean locally; the pull request's CI.
+
 ### Raouf: 2026-04-07 (Australia/Sydney) — CI: npm install + rustfmt
 
 - **Scope:** Root npm config; Rust formatting across `src-tauri/`.
